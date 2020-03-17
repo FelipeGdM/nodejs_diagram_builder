@@ -1,0 +1,17 @@
+{
+  "name": "@flow-build/cockpit",
+  "version": "1.0.0",
+  "description": "workflow manager api",
+  "main": "index.js",
+  "author": "fdte-dsd",
+  "license": "Apache-2.0",
+  "keywords": [],
+  "homepage": "https://github.com/flow-build/Cockpit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flow-build/cockpit.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
