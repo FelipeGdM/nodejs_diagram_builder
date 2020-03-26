@@ -1,4 +1,4 @@
-# Workflow to associate labels automatically
+# cockpit to associate labels automatically
 name: Labeler
 
 on:
