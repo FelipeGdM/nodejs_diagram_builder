@@ -1,5 +1,5 @@
 {
-  "name": "@flow-build/cockpit",
+  "name": "@flowbuild/cockpit",
   "version": "1.0.0",
   "description": "workflow manager api",
   "main": "index.js",
