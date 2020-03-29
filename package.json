@@ -12,6 +12,9 @@
     "url": "https://github.com/flow-build/cockpit.git"
   },
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "release": "semantic-release"
+  },
   "devDependencies": {
     "semantic-release": "^17.0.4",
     "@semantic-release/changelog": "^5.0.1",
