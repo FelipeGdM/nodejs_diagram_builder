@@ -9,7 +9,7 @@
   "homepage": "https://github.com/flow-build/Cockpit#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/flow-build/cockpit.git"
+    "url": "https://github.com/flow-build/cockpit.git"
   },
   "scripts": {
   "devDependencies": {
