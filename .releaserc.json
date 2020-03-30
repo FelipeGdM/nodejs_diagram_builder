@@ -10,9 +10,13 @@
         }
     ],
     "plugins": [
-        "@semantic-release/release-notes-generator",
         "@semantic-release/npm",
-        "@semantic-release/github",
+        [
+            "@semantic-release/release-notes-generator",
+            {
+                "preset": "conventionalcommits"
+            }
+        ],
         [
             "@semantic-release/commit-analyzer",
             {
@@ -26,7 +30,7 @@
             }
         ],
         [
-            "@semantic-release/git",
+            "@semantic-release/github",
             {
                 "assets": [
                     "CHANGELOG.md"
@@ -34,10 +38,11 @@
             }
         ],
         [
-            "semantic-release-slack-bot",
+            "@semantic-release/git",
             {
-                "notifyOnSuccess": false,
-                "notifyOnFail": true
+                "assets": [
+                    "CHANGELOG.md"
+                ]
             }
         ]
     ]
