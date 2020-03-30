@@ -1,6 +1,6 @@
 {
   "name": "@flowbuild/cockpit",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "workflow manager api",
   "main": "index.js",
   "author": "fdte-dsd",
