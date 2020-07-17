@@ -4,23 +4,81 @@ const path = require('path');
 const BpmnModdle = require('bpmn-moddle');
 const moddle = new BpmnModdle();
 
-const simple_workflow = JSON.parse(fs.readFileSync(path.join('./assets', 'simple_workflow.json')));
+const simple_workflow = {
+  "name": "SIMPLE_WORKFLOW",
+  "description": "Simple workflow used to validation",
+  "blueprint_spec": {
+    "nodes":[
+      {
+        "id": "1",
+        "name": "Start node",
+        "next": "2",
+        "type": "Start",
+        "lane_id": "99",
+        "parameters": {
+          "input_schema": {}
+        }
+      },
+      {
+        "id": "2",
+        "name": "Set to bag node",
+        "next": "99",
+        "type": "SystemTask",
+        "lane_id": "99",
+        "category": "setToBag",
+        "parameters": {
+          "input": {
+            "creatorId": {
+              "$ref": "actor_data.actor_id"
+            }
+          }
+        }},
+      {
+        "id": "99",
+        "name": "Finish node",
+        "type": "Finish",
+        "lane_id": "99",
+        "parameters": {
+          "input_schema": {}
+        }
+      }
+    ],
+    "lanes":[
+      {
+        "id": "99",
+        "name": "everyone",
+        "rule": [
+          "fn",
+          [
+            "&",
+            "args"
+          ],
+          true
+        ]
+      }
+    ]
+  }
+}
 
 const start_node = simple_workflow.blueprint_spec.nodes[0];
 const system_task_node = simple_workflow.blueprint_spec.nodes[1];
 const finish_node = simple_workflow.blueprint_spec.nodes[2];
 
-const not_simple_workflow = JSON.parse(fs.readFileSync(path.join('./assets', 'ACQ_DENIED.json')));
-
 const converter = new xmlConverter();
 
-describe('should export types', function() {
+describe('parsing tests', function() {
 
   function write(element) {
 
     // skip preamble for tests
     return moddle.toXML(element, { preamble: false });
   }
+
+  describe('invalid input', function() {
+    it("Empty spec", async function(){
+      expect(() => converter.build_graph([])).toThrow();
+    });
+  });
 
   describe('sequence parser', function() {
     it("Start node", async function(){
@@ -110,7 +168,7 @@ describe('should export types', function() {
     it("Create participant tag", async function(){
 
       const expectedXML = '<bpmn:participant xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
-        'id="Global_Actor" />';
+        'id="Global_Actor" processRef="Global_Process" />';
 
       das_converter.build_graph(simple_workflow.blueprint_spec);
       const { xml } = await write(das_converter.xml_participant);
@@ -122,7 +180,7 @@ describe('should export types', function() {
 
       const expectedXML = '<bpmn:collaboration xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
         'id="Global_Colab">' +
-          '<bpmn:participant id="Global_Actor" />' +
+          '<bpmn:participant id="Global_Actor" processRef="Global_Process" />' +
         '</bpmn:collaboration>';
 
       das_converter.build_graph(simple_workflow.blueprint_spec);
@@ -133,7 +191,7 @@ describe('should export types', function() {
 
     it("Build process tag", async function(){
 
-      const expectedXML = '<bpmn:process xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Global_Process">' +
+      const expectedXML = '<bpmn:process xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Global_Process" isExecutable="true">' +
         '<bpmn:laneSet id="Global_LaneSet">' +
             '<bpmn:lane id="Lane_99">' +
                 '<bpmn:flowNodeRef>Node_1</bpmn:flowNodeRef>' +
