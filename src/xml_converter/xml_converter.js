@@ -156,16 +156,6 @@ class xmlConverter{
 
     build_diagram(xml_nodes, xml_sequences){
 
-        // let bounds = moddle.create("dc:Bounds", {
-        //     x: 10,
-        //     y: 10,
-        //     width: 100,
-        //     height: 80
-        // });
-
-        let waypoint = [moddle.create("dc:Point", {x: 50, y: 50,}),
-            moddle.create("dc:Point", {x: 10, y: 50,})];
-
         const diagram_nodes = xml_nodes.map((node, index) => {
 
             const dim = 36;
@@ -176,6 +166,15 @@ class xmlConverter{
                 height: 80
             });
 
+            if(node.$type === "bpmn:StartEvent" || node.$type === "bpmn:EndEvent"){
+                if(node.$type === "bpmn:StartEvent"){
+                    bounds.x += bounds.width - dim;
+                }
+                bounds.y += (bounds.height - dim)/2;
+                bounds.width = dim;
+                bounds.height = dim;
+            }
+
             return moddle.create("bpmndi:BPMNShape", {
                 id: node.id + "_di",
                 bpmnElement: {id: node.id},
@@ -183,8 +182,10 @@ class xmlConverter{
             });
         });
 
-        const diagram_edges = xml_sequences.map(seq => {
-
+        const diagram_edges = xml_sequences.map((seq, index) => {
+            let waypoint = [
+                moddle.create("dc:Point", {x: 30+120*(index+1), y: 90,}),
+                moddle.create("dc:Point", {x: 50+120*(index+1), y: 90,})];
             return moddle.create("bpmndi:BPMNEdge", {
                 id: seq.id + "_di",
                 bpmnElement: {id: seq.id},
