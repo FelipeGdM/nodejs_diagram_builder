@@ -5,7 +5,6 @@ class xmlConverter{
 
     static validate(spec) {
         if(!spec.nodes || !spec.lanes){
-            console.log(spec);
             return false;
         }
         return true;
@@ -114,10 +113,6 @@ class xmlConverter{
             rootElements,
             // diagrams: this.xml_diagrams
         });
-    }
-
-    initialize(){
-        this.root = moddle.create('bpmn:Definitions');
     }
 
     build_sequence_flow(nodes){
