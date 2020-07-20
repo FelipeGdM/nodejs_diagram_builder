@@ -211,10 +211,17 @@ class xmlConverter{
             });
         });
 
-        const diagram_edges = xml_sequences.map((seq, index) => {
+        const diagram_edges = xml_sequences.map((seq) => {
             let waypoint = [
-                moddle.create("dc:Point", {x: 30+120*(index+1), y: 90,}),
-                moddle.create("dc:Point", {x: 50+120*(index+1), y: 90,})];
+                moddle.create("dc:Point",
+                {
+                    x: default_padding + default_width + default_spacing*id2rank[seq.sourceRef.id],
+                    y: default_padding + default_height/2
+                }),
+                moddle.create("dc:Point", {
+                    x: default_padding + default_spacing*id2rank[seq.targetRef.id],
+                    y: default_padding + default_height/2
+                })];
             return moddle.create("bpmndi:BPMNEdge", {
                 id: seq.id + "_di",
                 bpmnElement: {id: seq.id},
