@@ -90,10 +90,9 @@ class xmlConverter{
             ]
         });
 
-        const incoming_flows = this.build_sequence_flow(blueprint_spec.nodes);
+        this.incoming_flows = this.build_sequence_flows(blueprint_spec.nodes);
 
-        this.xml_nodes = blueprint_spec.nodes.map(node =>
-            this.parse_node(node, incoming_flows));
+        this.xml_nodes = this.build_nodes(blueprint_spec.nodes, this.incoming_flows);
 
         this.xml_laneset = this.build_laneset(blueprint_spec.nodes, blueprint_spec.lanes);
 
@@ -115,7 +114,12 @@ class xmlConverter{
         });
     }
 
-    build_sequence_flow(nodes){
+    build_nodes(nodes, incoming_flows){
+        nodes.map(node =>
+            this.parse_node(node, incoming_flows));
+    }
+
+    build_sequence_flows(nodes){
 
         let incoming_flows = {};
         this.xml_sequences = nodes.reduce( (retval, seq) => {
