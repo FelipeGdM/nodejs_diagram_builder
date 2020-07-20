@@ -159,24 +159,48 @@ class xmlConverter{
 
     build_diagram(xml_nodes, xml_sequences, id2rank){
 
-        const diagram_nodes = xml_nodes.map((node, index) => {
+        const default_height = 80;
+        const default_width = 100;
+        const default_spacing = 120;
+        const default_padding = 50;
 
-            const dim = 36;
-            let bounds = moddle.create("dc:Bounds", {
-                x: 50+120*id2rank[node.id],
-                y: 50,
-                width: 100,
-                height: 80
+        const start_stop_dim = 36;
+
+        const default_style = (node_id) => {
+            return moddle.create("dc:Bounds", {
+                x: default_padding + default_spacing*id2rank[node_id],
+                y: default_padding,
+                width: default_width,
+                height: default_height
             });
+        }
 
-            if(node.$type === "bpmn:StartEvent" || node.$type === "bpmn:EndEvent"){
-                if(node.$type === "bpmn:StartEvent"){
-                    bounds.x += bounds.width - dim;
-                }
-                bounds.y += (bounds.height - dim)/2;
-                bounds.width = dim;
-                bounds.height = dim;
-            }
+        const bounds_style = {
+            "bpmn:StartEvent": (node_id) => {
+                return moddle.create("dc:Bounds", {
+                    x: default_padding + default_spacing*id2rank[node_id] + default_width - start_stop_dim,
+                    y: default_padding + (default_height - start_stop_dim)/2,
+                    width: start_stop_dim,
+                    height: start_stop_dim
+                });
+            },
+            "bpmn:EndEvent": (node_id) => {
+                return moddle.create("dc:Bounds", {
+                    x: default_padding + default_spacing*id2rank[node_id],
+                    y: default_padding + (default_height - start_stop_dim)/2,
+                    width: start_stop_dim,
+                    height: start_stop_dim
+                });
+            },
+            "bpmn:ServiceTask": default_style,
+            "bpmn:UserTask": default_style,
+            "bpmn:ScriptTask": default_style,
+            "bpmn:Task": default_style,
+        }
+
+        const diagram_nodes = xml_nodes.map((node) => {
+
+            let bounds = bounds_style[node.$type](node.id);
 
             return moddle.create("bpmndi:BPMNShape", {
                 id: node.id + "_di",
