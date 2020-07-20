@@ -106,6 +106,7 @@ class xmlConverter{
         });
 
         this.xml_diagrams = this.build_diagram(this.xml_nodes, this.xml_sequences);
+
         const rootElements = [this.xml_process, this.xml_collab, this.xml_diagrams];
         this.root = moddle.create('bpmn:Definitions',
         {
@@ -115,7 +116,7 @@ class xmlConverter{
     }
 
     build_nodes(nodes, incoming_flows){
-        nodes.map(node =>
+        return nodes.map(node =>
             this.parse_node(node, incoming_flows));
     }
 
@@ -217,6 +218,53 @@ class xmlConverter{
             id: "Global_Diagram",
             plane
         });
+    }
+
+    build_nodes_id2index(nodes){
+        let id2index = {};
+        nodes.forEach( (value, index) => {
+            id2index[value.id] = index;
+        });
+        return id2index;
+    }
+
+    discover_node_ranks(nodes, id2index){
+        let pile = [];
+        let id2rank = {};
+
+        pile.push(nodes[0]);
+        id2rank[nodes[0].id] = 0;
+
+        while(pile.length != 0){
+            const curr_node = pile.pop();
+            let list_childs = [];
+
+            switch(typeof curr_node.next){
+                case "string":
+                    list_childs.push(curr_node.next);
+                    break;
+
+                case "list":
+                    list_childs.concat(curr_node.next);
+                    break;
+
+                case "undefined":
+                    break;
+
+                default:
+                    console.log("xml_converter.discover_node_ranks() -> Unsupported type!");
+                    break;
+            }
+
+            list_childs.forEach((child_id)=>{
+                if(typeof id2rank[child_id] === "undefined"){
+                    id2rank[child_id] = id2rank[curr_node.id] + 1;
+                    pile.push(nodes[id2index[child_id]]);
+                }
+            });
+        }
+
+        return id2rank;
     }
 
     async to_xml(){

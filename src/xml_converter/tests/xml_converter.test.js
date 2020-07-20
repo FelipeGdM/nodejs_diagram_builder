@@ -96,7 +96,24 @@ describe('parsing tests', function() {
 
   describe('node parser', function() {
 
-    const sequences = converter.build_sequence_flow(simple_workflow.blueprint_spec.nodes);
+    const sequences = converter.build_sequence_flows(simple_workflow.blueprint_spec.nodes);
+
+    it("Id index bijection", async function(){
+
+      const id2index = converter.build_nodes_id2index(simple_workflow.blueprint_spec.nodes);
+      const expected = {"1": 0, "2": 1, "99": 2};
+
+      expect(id2index).toStrictEqual(expected);
+    });
+
+    it("Node rank discover", async function(){
+
+      const id2index = converter.build_nodes_id2index(simple_workflow.blueprint_spec.nodes);
+      const id2rank = converter.discover_node_ranks(simple_workflow.blueprint_spec.nodes, id2index);
+      const expected = {"1": 0, "2": 1, "99": 2};
+
+      expect(id2rank).toStrictEqual(expected);
+    });
 
     it("Start node", async function(){
 
@@ -135,7 +152,6 @@ describe('parsing tests', function() {
       const { xml } = await write(tag_obj);
       expect(xml).toEqual(expectedXML);
     });
-
   });
 
   describe('lane parser', function() {
