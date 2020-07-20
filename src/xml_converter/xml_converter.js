@@ -90,9 +90,9 @@ class xmlConverter{
             ]
         });
 
-        this.incoming_flows = this.build_sequence_flows(blueprint_spec.nodes);
+        const incoming_flows = this.build_sequence_flows(blueprint_spec.nodes);
 
-        this.xml_nodes = this.build_nodes(blueprint_spec.nodes, this.incoming_flows);
+        this.xml_nodes = this.build_nodes(blueprint_spec.nodes, incoming_flows);
 
         this.xml_laneset = this.build_laneset(blueprint_spec.nodes, blueprint_spec.lanes);
 
@@ -105,7 +105,10 @@ class xmlConverter{
             flowElements
         });
 
-        this.xml_diagrams = this.build_diagram(this.xml_nodes, this.xml_sequences);
+        const id2index = this.build_nodes_id2index(blueprint_spec.nodes);
+        const id2rank = this.discover_node_ranks(blueprint_spec.nodes, id2index);
+
+        this.xml_diagrams = this.build_diagram(this.xml_nodes, this.xml_sequences, id2rank);
 
         const rootElements = [this.xml_process, this.xml_collab, this.xml_diagrams];
         this.root = moddle.create('bpmn:Definitions',
@@ -154,13 +157,13 @@ class xmlConverter{
         return  moddle.create('bpmn:LaneSet', {id:'Global_LaneSet', lanes:xml_lanes});
     }
 
-    build_diagram(xml_nodes, xml_sequences){
+    build_diagram(xml_nodes, xml_sequences, id2rank){
 
         const diagram_nodes = xml_nodes.map((node, index) => {
 
             const dim = 36;
             let bounds = moddle.create("dc:Bounds", {
-                x: 50+120*index,
+                x: 50+120*id2rank[node.id],
                 y: 50,
                 width: 100,
                 height: 80
@@ -233,7 +236,7 @@ class xmlConverter{
         let id2rank = {};
 
         pile.push(nodes[0]);
-        id2rank[nodes[0].id] = 0;
+        id2rank[xmlConverter.std_node_id(nodes[0].id)] = 0;
 
         while(pile.length != 0){
             const curr_node = pile.pop();
@@ -257,8 +260,11 @@ class xmlConverter{
             }
 
             list_childs.forEach((child_id)=>{
-                if(typeof id2rank[child_id] === "undefined"){
-                    id2rank[child_id] = id2rank[curr_node.id] + 1;
+                if(typeof id2rank[xmlConverter.std_node_id(child_id)] === "undefined"){
+
+                    id2rank[xmlConverter.std_node_id(child_id)] =
+                        id2rank[xmlConverter.std_node_id(curr_node.id)] + 1;
+
                     pile.push(nodes[id2index[child_id]]);
                 }
             });

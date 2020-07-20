@@ -110,7 +110,7 @@ describe('parsing tests', function() {
 
       const id2index = converter.build_nodes_id2index(simple_workflow.blueprint_spec.nodes);
       const id2rank = converter.discover_node_ranks(simple_workflow.blueprint_spec.nodes, id2index);
-      const expected = {"1": 0, "2": 1, "99": 2};
+      const expected = {"Node_1": 0, "Node_2": 1, "Node_99": 2};
 
       expect(id2rank).toStrictEqual(expected);
     });
