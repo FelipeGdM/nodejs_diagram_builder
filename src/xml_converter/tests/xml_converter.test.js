@@ -135,7 +135,7 @@ describe('parsing tests', function() {
         '<bpmn:incoming>Flow_2_99</bpmn:incoming>' +
         '</bpmn:endEvent>';
 
-      const tag_obj = converter.parse_node(finish_node, sequences);
+      const tag_obj = converter.parse_node(finish_node, sequences.incoming_flows);
       const { xml } = await write(tag_obj);
       expect(xml).toEqual(expectedXML);
     });
@@ -148,7 +148,7 @@ describe('parsing tests', function() {
         '<bpmn:outgoing>Flow_2_99</bpmn:outgoing>' +
         '</bpmn:serviceTask>';
 
-      const tag_obj = converter.parse_node(system_task_node, sequences);
+      const tag_obj = converter.parse_node(system_task_node, sequences.incoming_flows);
       const { xml } = await write(tag_obj);
       expect(xml).toEqual(expectedXML);
     });

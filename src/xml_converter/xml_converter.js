@@ -90,8 +90,9 @@ class xmlConverter{
             ]
         });
 
-        const incoming_flows = this.build_sequence_flows(blueprint_spec.nodes);
+        const {incoming_flows, xml_sequences} = this.build_sequence_flows(blueprint_spec.nodes);
 
+        this.xml_sequences = xml_sequences;
         this.xml_nodes = this.build_nodes(blueprint_spec.nodes, incoming_flows);
 
         this.xml_laneset = this.build_laneset(blueprint_spec.nodes, blueprint_spec.lanes);
@@ -125,20 +126,21 @@ class xmlConverter{
 
     build_sequence_flows(nodes){
 
-        let incoming_flows = {};
-        this.xml_sequences = nodes.reduce( (retval, seq) => {
+        let xml_sequences = nodes.reduce( (retval, seq) => {
             const parsed = this.parse_sequence_flow(seq);
             if(typeof parsed !== "undefined"){
                 retval.push(parsed);
             }
             return retval;
         }, []);
+
+        let incoming_flows = {};
         nodes.forEach(node => incoming_flows[xmlConverter.std_node_id(node.id)] = []);
-        this.xml_sequences.forEach(seq => {
+        xml_sequences.forEach(seq => {
             incoming_flows[seq.targetRef.id].push(seq)
         });
 
-        return incoming_flows;
+        return {incoming_flows, xml_sequences};
     }
 
     parse_lane(nodes, lane){
