@@ -211,9 +211,13 @@ class xmlConverter{
             "Flow": default_style,
         }
 
+        const bounds_array = {};
+        nodes.forEach((node) =>
+            bounds_array[xmlConverter.std_node_id(node.id)] = bounds_style[node.type](node));
+
         const diagram_nodes = nodes.map((node) => {
 
-            let bounds = bounds_style[node.type](node);
+            let bounds = bounds_array[xmlConverter.std_node_id(node.id)];
 
             return moddle.create("bpmndi:BPMNShape", {
                 id: xmlConverter.std_node_id(node.id) + "_di",
@@ -226,12 +230,12 @@ class xmlConverter{
             let waypoint = [
                 moddle.create("dc:Point",
                 {
-                    x: default_padding + default_width + default_x_spacing*id2rank[seq.sourceRef.id][0],
-                    y: default_padding + default_height/2
+                    x: bounds_array[seq.sourceRef.id].x + bounds_array[seq.sourceRef.id].width,
+                    y: bounds_array[seq.sourceRef.id].y + bounds_array[seq.sourceRef.id].height/2
                 }),
                 moddle.create("dc:Point", {
-                    x: default_padding + default_x_spacing*id2rank[seq.targetRef.id][0],
-                    y: default_padding + default_height/2
+                    x: bounds_array[seq.targetRef.id].x,
+                    y: bounds_array[seq.targetRef.id].y + bounds_array[seq.targetRef.id].height/2
                 })];
             return moddle.create("bpmndi:BPMNEdge", {
                 id: seq.id + "_di",
