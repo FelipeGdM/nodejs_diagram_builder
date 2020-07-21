@@ -109,7 +109,7 @@ class xmlConverter{
         const id2index = this.build_nodes_id2index(blueprint_spec.nodes);
         const id2rank = this.discover_node_ranks(blueprint_spec.nodes, id2index);
 
-        this.xml_diagrams = this.build_diagram(this.xml_nodes, this.xml_sequences, id2rank);
+        this.xml_diagrams = this.build_diagram(blueprint_spec, this.xml_sequences, id2rank);
 
         const rootElements = [this.xml_process, this.xml_collab, this.xml_diagrams];
         this.root = moddle.create('bpmn:Definitions',
@@ -159,8 +159,9 @@ class xmlConverter{
         return  moddle.create('bpmn:LaneSet', {id:'Global_LaneSet', lanes:xml_lanes});
     }
 
-    build_diagram(xml_nodes, xml_sequences, id2rank){
+    build_diagram(spec, xml_sequences, id2rank){
 
+        const nodes = spec.nodes;
         const default_height = 80;
         const default_width = 100;
         const default_x_spacing = default_width + 20;
@@ -169,45 +170,48 @@ class xmlConverter{
 
         const start_stop_dim = 36;
 
-        const default_style = (node_id) => {
+        const default_lane_heigth = default_y_spacing*6;
+        const lanes_ids = spec.lanes.map(lane => lane.id).sort((a,b) => a - b);
+
+        const default_style = (node) => {
             return moddle.create("dc:Bounds", {
-                x: default_padding + default_x_spacing*id2rank[node_id][0],
-                y: default_padding + default_y_spacing*id2rank[node_id][1],
+                x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0],
+                y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + default_lane_heigth*lanes_ids.findIndex(el => el===node.lane_id),
                 width: default_width,
                 height: default_height
             });
         }
 
         const bounds_style = {
-            "bpmn:StartEvent": (node_id) => {
+            "Start": (node) => {
                 return moddle.create("dc:Bounds", {
-                    x: default_padding + default_x_spacing*id2rank[node_id][0] + default_width - start_stop_dim,
-                    y: default_padding + default_y_spacing*id2rank[node_id][1] + (default_height - start_stop_dim)/2,
+                    x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0] + default_width - start_stop_dim,
+                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2,
                     width: start_stop_dim,
                     height: start_stop_dim
                 });
             },
-            "bpmn:EndEvent": (node_id) => {
+            "Finish": (node) => {
                 return moddle.create("dc:Bounds", {
-                    x: default_padding + default_x_spacing*id2rank[node_id][0],
-                    y: default_padding + default_y_spacing*id2rank[node_id][1] + (default_height - start_stop_dim)/2,
+                    x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0],
+                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2,
                     width: start_stop_dim,
                     height: start_stop_dim
                 });
             },
-            "bpmn:ServiceTask": default_style,
-            "bpmn:UserTask": default_style,
-            "bpmn:ScriptTask": default_style,
-            "bpmn:Task": default_style,
+            "SystemTask": default_style,
+            "UserTask": default_style,
+            "ScriptTask": default_style,
+            "Flow": default_style,
         }
 
-        const diagram_nodes = xml_nodes.map((node) => {
+        const diagram_nodes = nodes.map((node) => {
 
-            let bounds = bounds_style[node.$type](node.id);
+            let bounds = bounds_style[node.type](node);
 
             return moddle.create("bpmndi:BPMNShape", {
-                id: node.id + "_di",
-                bpmnElement: {id: node.id},
+                id: xmlConverter.std_node_id(node.id) + "_di",
+                bpmnElement: {id: xmlConverter.std_node_id(node.id)},
                 bounds
             });
         });
@@ -272,6 +276,7 @@ class xmlConverter{
         pile.push(nodes[0]);
         id2rank[xmlConverter.std_node_id(nodes[0].id)] = [0,-1];
 
+        // x ranks
         while(pile.length != 0){
             const curr_node = pile.pop();
             let list_childs = [];
@@ -311,6 +316,7 @@ class xmlConverter{
             });
         }
 
+        // y ranks
         let flow_pile = [];
         let y_depth = 0;
         flow_pile.push(nodes[0]);
