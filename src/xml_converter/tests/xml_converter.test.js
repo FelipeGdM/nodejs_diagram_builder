@@ -107,11 +107,14 @@ describe('parsing tests', function() {
       expect(id2index).toStrictEqual(expected);
     });
 
-    it("Node rank discover", async function(){
+    it("Simple node rank discover", async function(){
 
       const id2index = converter.build_nodes_id2index(simple_workflow.blueprint_spec.nodes);
-      const id2rank = converter.discover_node_ranks(simple_workflow.blueprint_spec.nodes, id2index);
-      const expected = {"Node_1": 0, "Node_2": 1, "Node_99": 2};
+      const {id2rank} = converter.discover_node_ranks(simple_workflow.blueprint_spec, id2index);
+      const expected = {"Node_1": [0,0], "Node_2": [1,0], "Node_99": [2,0]};
+
+      expect(id2rank).toStrictEqual(expected);
+    });
 
       expect(id2rank).toStrictEqual(expected);
     });

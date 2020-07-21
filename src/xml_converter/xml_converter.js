@@ -107,9 +107,9 @@ class xmlConverter{
         });
 
         const id2index = this.build_nodes_id2index(blueprint_spec.nodes);
-        const id2rank = this.discover_node_ranks(blueprint_spec.nodes, id2index);
+        const {id2rank, y_depth} = this.discover_node_ranks(blueprint_spec, id2index);
 
-        this.xml_diagrams = this.build_diagram(blueprint_spec, this.xml_sequences, id2rank);
+        this.xml_diagrams = this.build_diagram(blueprint_spec, this.xml_sequences, id2rank, y_depth);
 
         const rootElements = [this.xml_process, this.xml_collab, this.xml_diagrams];
         this.root = moddle.create('bpmn:Definitions',
@@ -159,7 +159,7 @@ class xmlConverter{
         return  moddle.create('bpmn:LaneSet', {id:'Global_LaneSet', lanes:xml_lanes});
     }
 
-    build_diagram(spec, xml_sequences, id2rank){
+    build_diagram(spec, xml_sequences, id2rank, y_depth){
 
         const nodes = spec.nodes;
         const default_height = 80;
@@ -170,13 +170,19 @@ class xmlConverter{
 
         const start_stop_dim = 36;
 
-        const default_lane_heigth = default_y_spacing*6;
+        const lane_heigth = y_depth.map(el => el*default_y_spacing);
+
+        let lane_heigth_con = [0];
+        for(let i = 1; i < lane_heigth.length; i++){
+            lane_heigth_con.push(lane_heigth_con[i-1]+lane_heigth[i-1]);
+        }
+
         const lanes_ids = spec.lanes.map(lane => lane.id).sort((a,b) => a - b);
 
         const default_style = (node) => {
             return moddle.create("dc:Bounds", {
                 x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0],
-                y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + default_lane_heigth*lanes_ids.findIndex(el => el===node.lane_id),
+                y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + lane_heigth_con[lanes_ids.findIndex(el => el===node.lane_id)],
                 width: default_width,
                 height: default_height
             });
@@ -269,7 +275,12 @@ class xmlConverter{
         return id2index;
     }
 
-    discover_node_ranks(nodes, id2index){
+    discover_node_ranks(spec, id2index){
+
+        const nodes = spec.nodes;
+        const lanes = spec.lanes;
+        const lanes_ids = lanes.map(lane => lane.id).sort((a, b) => a - b);
+
         let pile = [];
         let id2rank = {};
 
@@ -318,7 +329,7 @@ class xmlConverter{
 
         // y ranks
         let flow_pile = [];
-        let y_depth = 0;
+        let y_depth = lanes_ids.map(() => 0);
         flow_pile.push(nodes[0]);
 
         while(flow_pile.length!==0){
@@ -328,12 +339,15 @@ class xmlConverter{
                 curr_node = flow_pile.pop();
             }
 
+            const curr_lane = curr_node.lane_id;
+
             while(curr_node){
                 if(id2rank[xmlConverter.std_node_id(curr_node.id)][1] !== -1){
                     break;
                 }
 
-                id2rank[xmlConverter.std_node_id(curr_node.id)][1] = y_depth;
+                id2rank[xmlConverter.std_node_id(curr_node.id)][1] =
+                    y_depth[lanes_ids.findIndex(el => el===curr_node.lane_id)];
 
                 switch(typeof curr_node.next){
                     case "string":
@@ -360,10 +374,10 @@ class xmlConverter{
                         break;
                 }
             }
-            y_depth += 1;
+            y_depth[lanes_ids.findIndex(el => el===curr_lane)] += 1;
         }
 
-        return id2rank;
+        return {id2rank, y_depth};
     }
 
     async to_xml(){
