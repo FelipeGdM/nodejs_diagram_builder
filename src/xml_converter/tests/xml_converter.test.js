@@ -32,7 +32,8 @@ const simple_workflow = {
               "$ref": "actor_data.actor_id"
             }
           }
-        }},
+        }
+      },
       {
         "id": "99",
         "name": "Finish node",

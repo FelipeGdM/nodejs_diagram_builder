@@ -171,8 +171,8 @@ class xmlConverter{
 
         const default_style = (node_id) => {
             return moddle.create("dc:Bounds", {
-                x: default_padding + default_x_spacing*id2rank[node_id],
-                y: default_padding,
+                x: default_padding + default_x_spacing*id2rank[node_id][0],
+                y: default_padding + default_y_spacing*id2rank[node_id][1],
                 width: default_width,
                 height: default_height
             });
@@ -181,16 +181,16 @@ class xmlConverter{
         const bounds_style = {
             "bpmn:StartEvent": (node_id) => {
                 return moddle.create("dc:Bounds", {
-                    x: default_padding + default_x_spacing*id2rank[node_id] + default_width - start_stop_dim,
-                    y: default_padding + (default_height - start_stop_dim)/2,
+                    x: default_padding + default_x_spacing*id2rank[node_id][0] + default_width - start_stop_dim,
+                    y: default_padding + default_y_spacing*id2rank[node_id][1] + (default_height - start_stop_dim)/2,
                     width: start_stop_dim,
                     height: start_stop_dim
                 });
             },
             "bpmn:EndEvent": (node_id) => {
                 return moddle.create("dc:Bounds", {
-                    x: default_padding + default_x_spacing*id2rank[node_id],
-                    y: default_padding + (default_height - start_stop_dim)/2,
+                    x: default_padding + default_x_spacing*id2rank[node_id][0],
+                    y: default_padding + default_y_spacing*id2rank[node_id][1] + (default_height - start_stop_dim)/2,
                     width: start_stop_dim,
                     height: start_stop_dim
                 });
@@ -216,11 +216,11 @@ class xmlConverter{
             let waypoint = [
                 moddle.create("dc:Point",
                 {
-                    x: default_padding + default_width + default_x_spacing*id2rank[seq.sourceRef.id],
+                    x: default_padding + default_width + default_x_spacing*id2rank[seq.sourceRef.id][0],
                     y: default_padding + default_height/2
                 }),
                 moddle.create("dc:Point", {
-                    x: default_padding + default_x_spacing*id2rank[seq.targetRef.id],
+                    x: default_padding + default_x_spacing*id2rank[seq.targetRef.id][0],
                     y: default_padding + default_height/2
                 })];
             return moddle.create("bpmndi:BPMNEdge", {
@@ -270,7 +270,7 @@ class xmlConverter{
         let id2rank = {};
 
         pile.push(nodes[0]);
-        id2rank[xmlConverter.std_node_id(nodes[0].id)] = 0;
+        id2rank[xmlConverter.std_node_id(nodes[0].id)] = [0,-1];
 
         while(pile.length != 0){
             const curr_node = pile.pop();
@@ -281,27 +281,80 @@ class xmlConverter{
                     list_childs.push(curr_node.next);
                     break;
 
-                case "list":
-                    list_childs.concat(curr_node.next);
-                    break;
+                case "object":
+                    if(curr_node.next){
+                        Object.keys(curr_node.next).forEach((key) => {
+                            const next_node = curr_node.next[key];
+                            if(!list_childs.includes(next_node)){
+                                list_childs.push(next_node);
+                            }
+                        });
+                    }
 
                 case "undefined":
                     break;
 
                 default:
-                    console.log("xml_converter.discover_node_ranks() -> Unsupported type!");
+                    console.log("xml_converter.discover_node_ranks() -> Unsupported type!", typeof curr_node.next);
                     break;
             }
 
             list_childs.forEach((child_id)=>{
                 if(typeof id2rank[xmlConverter.std_node_id(child_id)] === "undefined"){
 
-                    id2rank[xmlConverter.std_node_id(child_id)] =
-                        id2rank[xmlConverter.std_node_id(curr_node.id)] + 1;
+                    id2rank[xmlConverter.std_node_id(child_id)] = [0,-1];
+                    id2rank[xmlConverter.std_node_id(child_id)][0] =
+                        id2rank[xmlConverter.std_node_id(curr_node.id)][0] + 1;
 
                     pile.push(nodes[id2index[child_id]]);
                 }
             });
+        }
+
+        let flow_pile = [];
+        let y_depth = 0;
+        flow_pile.push(nodes[0]);
+
+        while(flow_pile.length!==0){
+            let curr_node = flow_pile.pop();
+
+            while(id2rank[xmlConverter.std_node_id(curr_node.id)][1] !== -1){
+                curr_node = flow_pile.pop();
+            }
+
+            while(curr_node){
+                if(id2rank[xmlConverter.std_node_id(curr_node.id)][1] !== -1){
+                    break;
+                }
+
+                id2rank[xmlConverter.std_node_id(curr_node.id)][1] = y_depth;
+
+                switch(typeof curr_node.next){
+                    case "string":
+                        curr_node = nodes[id2index[curr_node.next]];
+                        break;
+
+                    case "object":
+                        if(curr_node.next){
+                            Object.keys(curr_node.next).forEach((key) => {
+                                const next_node = nodes[id2index[curr_node.next[key]]];
+                                if(!flow_pile.includes(next_node)){
+                                    flow_pile.push(next_node);
+                                }
+                            });
+                            curr_node = flow_pile.pop();
+                        }
+                        break;
+
+                    case "undefined":
+                        curr_node = null;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            y_depth += 1;
         }
 
         return id2rank;
