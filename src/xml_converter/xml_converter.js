@@ -163,14 +163,15 @@ class xmlConverter{
 
         const default_height = 80;
         const default_width = 100;
-        const default_spacing = 120;
+        const default_x_spacing = default_width + 20;
+        const default_y_spacing = default_height + 20;
         const default_padding = 50;
 
         const start_stop_dim = 36;
 
         const default_style = (node_id) => {
             return moddle.create("dc:Bounds", {
-                x: default_padding + default_spacing*id2rank[node_id],
+                x: default_padding + default_x_spacing*id2rank[node_id],
                 y: default_padding,
                 width: default_width,
                 height: default_height
@@ -180,7 +181,7 @@ class xmlConverter{
         const bounds_style = {
             "bpmn:StartEvent": (node_id) => {
                 return moddle.create("dc:Bounds", {
-                    x: default_padding + default_spacing*id2rank[node_id] + default_width - start_stop_dim,
+                    x: default_padding + default_x_spacing*id2rank[node_id] + default_width - start_stop_dim,
                     y: default_padding + (default_height - start_stop_dim)/2,
                     width: start_stop_dim,
                     height: start_stop_dim
@@ -188,7 +189,7 @@ class xmlConverter{
             },
             "bpmn:EndEvent": (node_id) => {
                 return moddle.create("dc:Bounds", {
-                    x: default_padding + default_spacing*id2rank[node_id],
+                    x: default_padding + default_x_spacing*id2rank[node_id],
                     y: default_padding + (default_height - start_stop_dim)/2,
                     width: start_stop_dim,
                     height: start_stop_dim
@@ -215,11 +216,11 @@ class xmlConverter{
             let waypoint = [
                 moddle.create("dc:Point",
                 {
-                    x: default_padding + default_width + default_spacing*id2rank[seq.sourceRef.id],
+                    x: default_padding + default_width + default_x_spacing*id2rank[seq.sourceRef.id],
                     y: default_padding + default_height/2
                 }),
                 moddle.create("dc:Point", {
-                    x: default_padding + default_spacing*id2rank[seq.targetRef.id],
+                    x: default_padding + default_x_spacing*id2rank[seq.targetRef.id],
                     y: default_padding + default_height/2
                 })];
             return moddle.create("bpmndi:BPMNEdge", {
