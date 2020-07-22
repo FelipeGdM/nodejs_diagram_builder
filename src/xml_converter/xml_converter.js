@@ -16,32 +16,32 @@ const BpmnModdle = require('bpmn-moddle');
 const Grid = require('./xml_grid');
 const moddle = new BpmnModdle();
 
-class xmlConverter{
+class xmlConverter {
 
     static validate(spec) {
-        if(!spec.nodes || !spec.lanes){
+        if (!spec.nodes || !spec.lanes) {
             return false;
         }
         return true;
     }
 
-    static std_lane_id(lane_id){
-        return "Lane_"+lane_id;
+    static std_lane_id(lane_id) {
+        return "Lane_" + lane_id;
     }
 
-    static std_node_id(node_id){
+    static std_node_id(node_id) {
         return ["Node", node_id].join("_");
     }
 
-    static std_node_name(node_name){
+    static std_node_name(node_name) {
         return node_name.split(" ").join("_");
     }
 
-    static std_flow_id(node_id, node_next){
+    static std_flow_id(node_id, node_next) {
         return ["Flow", node_id, node_next].join("_")
     }
 
-    parse_node(node, incoming_flows){
+    parse_node(node, incoming_flows) {
         const params = {
             id: xmlConverter.std_node_id(node.id),
             name: xmlConverter.std_node_name(node.name),
@@ -50,7 +50,7 @@ class xmlConverter{
         if(node.type === "Start"){
             params.outgoing = this.parse_sequence_flow(node);
             return moddle.create('bpmn:StartEvent', params);
-        }else if(node.type === "Finish"){
+        } else if (node.type === "Finish") {
             params.incoming = incoming_flows[xmlConverter.std_node_id(node.id)];
             return moddle.create('bpmn:EndEvent', params);
         } else if (node.type === 'Flow') {
@@ -62,7 +62,7 @@ class xmlConverter{
         params.outgoing = this.parse_sequence_flow(node);
         params.incoming = incoming_flows[xmlConverter.std_node_id(node.id)];
 
-        switch(node.type){
+        switch (node.type) {
             case "SystemTask":
                 return moddle.create('bpmn:ServiceTask', params);
 
@@ -77,14 +77,14 @@ class xmlConverter{
         };
     }
 
-    parse_sequence_flow(node){
+    parse_sequence_flow(node) {
 
-        if(node.type !== "Flow" && node.type !== "Finish"){
+        if (node.type !== "Flow" && node.type !== "Finish") {
             // If node is not a flow node,
             // it has only one outgoing sequence
             const id = xmlConverter.std_flow_id(node.id, node.next);
-            const sourceRef = {id: xmlConverter.std_node_id(node.id) };
-            const targetRef = {id: xmlConverter.std_node_id(node.next) };
+            const sourceRef = { id: xmlConverter.std_node_id(node.id) };
+            const targetRef = { id: xmlConverter.std_node_id(node.next) };
 
             return [moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef })];
         } else if (node.type === 'Flow') {
@@ -104,14 +104,14 @@ class xmlConverter{
         }
     }
 
-    build_graph(blueprint_spec){
+    build_graph(blueprint_spec) {
         if (!xmlConverter.validate(blueprint_spec)) {
-			throw new Error('Invalid spec: no nodes or no lanes.');
+            throw new Error('Invalid spec: no nodes or no lanes.');
         };
 
         this.xml_participant = moddle.create("bpmn:Participant", {
             id: "Global_Actor",
-            processRef: {id: "Global_Process"}
+            processRef: { id: "Global_Process" }
         });
 
         this.xml_collab = moddle.create("bpmn:Collaboration", {
@@ -128,8 +128,8 @@ class xmlConverter{
 
         this.xml_laneset = this.build_laneset(blueprint_spec.nodes, blueprint_spec.lanes);
 
-        const flowElements = this.xml_nodes.concat(this.xml_sequences);
-        this.xml_process = moddle.create("bpmn:Process",{
+        const flowElements = this.xml_nodes.concat(this.xml_sequences.flat());
+        this.xml_process = moddle.create("bpmn:Process", {
             // id: "Process_01zyiho",
             id: "Global_Process",
             laneSets: [this.xml_laneset],
@@ -144,10 +144,10 @@ class xmlConverter{
 
         const rootElements = [this.xml_process, this.xml_collab, this.xml_diagrams];
         this.root = moddle.create('bpmn:Definitions',
-        {
-            rootElements,
-            // diagrams: this.xml_diagrams
-        });
+            {
+                rootElements,
+                // diagrams: this.xml_diagrams
+            });
     }
 
     build_nodes(nodes, incoming_flows){
@@ -175,20 +175,20 @@ class xmlConverter{
         return {incoming_flows, xml_sequences};
     }
 
-    parse_lane(nodes, lane){
+    parse_lane(nodes, lane) {
         const id = xmlConverter.std_lane_id(lane.id);
         let flowNodeRef = [];
         nodes.forEach(node => {
-            if(node.lane_id === lane.id){
-                flowNodeRef.push({id: xmlConverter.std_node_id(node.id)});
+            if (node.lane_id === lane.id) {
+                flowNodeRef.push({ id: xmlConverter.std_node_id(node.id) });
             }
         });
-        return moddle.create('bpmn:Lane', {id, flowNodeRef});
+        return moddle.create('bpmn:Lane', { id, flowNodeRef });
     }
 
-    build_laneset(nodes, lanes){
+    build_laneset(nodes, lanes) {
         let xml_lanes = lanes.map(lane => this.parse_lane(nodes, lane));
-        return  moddle.create('bpmn:LaneSet', {id:'Global_LaneSet', lanes:xml_lanes});
+        return moddle.create('bpmn:LaneSet', { id: 'Global_LaneSet', lanes: xml_lanes });
     }
 
     build_diagram(spec, xml_sequences, id2rank, y_depth){
@@ -326,7 +326,7 @@ class xmlConverter{
             let waypoint = generate_waypoints(bounds_array[seq.sourceRef.id], bounds_array[seq.targetRef.id]);
             return moddle.create("bpmndi:BPMNEdge", {
                 id: seq.id + "_di",
-                bpmnElement: {id: seq.id},
+                bpmnElement: { id: seq.id },
                 waypoint
             })
         });
@@ -359,13 +359,13 @@ class xmlConverter{
 
         planeElement.push(moddle.create("bpmndi:BPMNShape", {
             id: "Global_Actor_di",
-            bpmnElement: {id: "Global_Actor"},
+            bpmnElement: { id: "Global_Actor" },
             bounds: bounds2
         }));
 
         const plane = moddle.create("bpmndi:BPMNPlane", {
             id: "Global_Plane",
-            bpmnElement: {id: "Global_Colab"},
+            bpmnElement: { id: "Global_Colab" },
             planeElement
         });
 
