@@ -78,8 +78,10 @@ class xmlConverter{
             for (let value in node.next) {
                 const nextId = node.next[value];
                 const id = xmlConverter.std_flow_id(node.id, nextId)
-                const targetRef = { id: xmlConverter.std_node_id(nextId) };
-                outgoing.push(moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef }));
+                if(outgoing.findIndex(el => el.id === id) === -1){
+                    const targetRef = { id: xmlConverter.std_node_id(nextId) };
+                    outgoing.push(moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef }));
+                }
             }
             return outgoing;
         } else {
