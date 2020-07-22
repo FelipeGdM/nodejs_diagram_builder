@@ -33,14 +33,18 @@ class xmlConverter{
         };
 
         if(node.type === "Start"){
-            params.outgoing = [this.parse_sequence_flow(node)];
+            params.outgoing = this.parse_sequence_flow(node);
             return moddle.create('bpmn:StartEvent', params);
         }else if(node.type === "Finish"){
             params.incoming = incoming_flows[xmlConverter.std_node_id(node.id)];
             return moddle.create('bpmn:EndEvent', params);
+        } else if (node.type === 'Flow') {
+            params.incoming = incoming_flows[xmlConverter.std_node_id(node.id)];
+            params.outgoing = this.parse_sequence_flow(node);
+            return moddle.create('bpmn:ExclusiveGateway', params)
         }
 
-        params.outgoing = [this.parse_sequence_flow(node)];
+        params.outgoing = this.parse_sequence_flow(node);
         params.incoming = incoming_flows[xmlConverter.std_node_id(node.id)];
 
         switch(node.type){
@@ -67,9 +71,19 @@ class xmlConverter{
             const sourceRef = {id: xmlConverter.std_node_id(node.id) };
             const targetRef = {id: xmlConverter.std_node_id(node.next) };
 
-            return moddle.create('bpmn:SequenceFlow', {id, sourceRef, targetRef});
-        }else{
-            return;
+            return [moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef })];
+        } else if (node.type === 'Flow') {
+            const sourceRef = { id: xmlConverter.std_node_id(node.id) };
+            const outgoing = [];
+            for (let value in node.next) {
+                const nextId = node.next[value];
+                const id = xmlConverter.std_flow_id(node.id, nextId)
+                const targetRef = { id: xmlConverter.std_node_id(nextId) };
+                outgoing.push(moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef }));
+            }
+            return outgoing;
+        } else {
+            return [];
         }
     }
 
@@ -126,18 +140,19 @@ class xmlConverter{
 
     build_sequence_flows(nodes){
 
-        let xml_sequences = nodes.reduce( (retval, seq) => {
-            const parsed = this.parse_sequence_flow(seq);
-            if(typeof parsed !== "undefined"){
-                retval.push(parsed);
-            }
-            return retval;
-        }, []);
+        let xml_sequences = [];
+        nodes.forEach((node) => {
+            const parsed = this.parse_sequence_flow(node);
+            xml_sequences = [...xml_sequences, ...parsed];
+        });
 
         let incoming_flows = {};
-        nodes.forEach(node => incoming_flows[xmlConverter.std_node_id(node.id)] = []);
+
         xml_sequences.forEach(seq => {
-            incoming_flows[seq.targetRef.id].push(seq)
+            if(typeof incoming_flows[seq.targetRef.id] === "undefined"){
+                incoming_flows[seq.targetRef.id] = [];
+            }
+            incoming_flows[seq.targetRef.id].push(seq);
         });
 
         return {incoming_flows, xml_sequences};
