@@ -181,8 +181,10 @@ class xmlConverter{
         const nodes = spec.nodes;
         const default_height = 80;
         const default_width = 100;
-        const default_x_spacing = default_width + 20;
-        const default_y_spacing = default_height + 20;
+        const default_x_margin = 10;
+        const default_y_margin = 10;
+        const default_x_spacing = default_width + 2*default_x_margin;
+        const default_y_spacing = default_height + 2*default_y_margin;
         const default_padding = 50;
 
         const max_x = 1 + Object.keys(id2rank).reduce((max, id) => Math.max(max, id2rank[id][0]), 0);
@@ -270,7 +272,7 @@ class xmlConverter{
         const total_heigth = lane_heigth.reduce((retval, el) => retval + el, 0)
         let bounds2 = moddle.create("dc:Bounds", {
             x: default_padding,
-            y: default_padding - 10,
+            y: default_padding - default_y_margin,
             width: default_total_width,
             height: total_heigth
         });
@@ -279,7 +281,7 @@ class xmlConverter{
 
             const bounds= moddle.create("dc:Bounds", {
                 x: default_padding + 30,
-                y: default_padding - 10 + lane_heigth_con[index],
+                y: default_padding - default_y_margin + lane_heigth_con[index],
                 width: default_total_width - 30,
                 height: lane_heigth[index]
             });
