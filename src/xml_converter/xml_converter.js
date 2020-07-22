@@ -182,8 +182,8 @@ class xmlConverter{
         const nodes = spec.nodes;
         const default_height = 80;
         const default_width = 100;
-        const default_x_margin = 10;
-        const default_y_margin = 10;
+        const default_x_margin = 30;
+        const default_y_margin = 30;
         const default_x_spacing = default_width + 2*default_x_margin;
         const default_y_spacing = default_height + 2*default_y_margin;
         const default_padding = 50;
@@ -250,17 +250,58 @@ class xmlConverter{
             });
         });
 
+        const generate_waypoints = (sourceRef, targetRef) => {
+            let points_list = [];
+            if(sourceRef.x < targetRef.x){
+                points_list.push([sourceRef.x + sourceRef.width,
+                    sourceRef.y + sourceRef.height/2]);
+
+                points_list.push([sourceRef.x + sourceRef.width + default_x_margin/3,
+                    sourceRef.y + sourceRef.height/2]);
+
+                points_list.push([sourceRef.x + sourceRef.width + default_x_margin/3,
+                    targetRef.y + targetRef.height/2]);
+
+                points_list.push([targetRef.x,
+                    targetRef.y + targetRef.height/2]);
+
+            }else if(sourceRef.y < targetRef.y){
+                points_list.push([sourceRef.x + sourceRef.width/2,
+                    sourceRef.y + sourceRef.height]);
+
+                points_list.push([sourceRef.x + sourceRef.width/2,
+                    sourceRef.y + sourceRef.height + default_y_margin/3]);
+
+                points_list.push([targetRef.x + targetRef.width/2,
+                    sourceRef.y + sourceRef.height + default_y_margin/3]);
+
+                points_list.push([targetRef.x + targetRef.width/2,
+                    targetRef.y]);
+
+            }else if(sourceRef.y > targetRef.y){
+                points_list.push([sourceRef.x + sourceRef.width/2,
+                    sourceRef.y + sourceRef.height]);
+
+                points_list.push([sourceRef.x + sourceRef.width/2,
+                    sourceRef.y + sourceRef.height + default_y_margin/3]);
+
+                points_list.push([targetRef.x + targetRef.width/2,
+                    sourceRef.y + sourceRef.height + default_y_margin/3]);
+
+                points_list.push([targetRef.x + targetRef.width/2,
+                    targetRef.y + targetRef.height]);
+            }else{
+                points_list.push([sourceRef.x + sourceRef.width,
+                    sourceRef.y + sourceRef.height/2]);
+
+                points_list.push([targetRef.x,
+                    targetRef.y + targetRef.height/2]);
+            }
+            return points_list.map(el => moddle.create("dc:Point", {x: el[0], y: el[1]}));
+        }
+
         const diagram_edges = xml_sequences.map((seq) => {
-            let waypoint = [
-                moddle.create("dc:Point",
-                {
-                    x: bounds_array[seq.sourceRef.id].x + bounds_array[seq.sourceRef.id].width,
-                    y: bounds_array[seq.sourceRef.id].y + bounds_array[seq.sourceRef.id].height/2
-                }),
-                moddle.create("dc:Point", {
-                    x: bounds_array[seq.targetRef.id].x,
-                    y: bounds_array[seq.targetRef.id].y + bounds_array[seq.targetRef.id].height/2
-                })];
+            let waypoint = generate_waypoints(bounds_array[seq.sourceRef.id], bounds_array[seq.targetRef.id]);
             return moddle.create("bpmndi:BPMNEdge", {
                 id: seq.id + "_di",
                 bpmnElement: {id: seq.id},
