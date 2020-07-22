@@ -185,6 +185,10 @@ class xmlConverter{
         const default_y_spacing = default_height + 20;
         const default_padding = 50;
 
+        const max_x = 1 + Object.keys(id2rank).reduce((max, id) => Math.max(max, id2rank[id][0]), 0);
+
+        const default_total_width = max_x*default_x_spacing;
+
         const start_stop_dim = 36;
 
         const lane_heigth = y_depth.map(el => el*default_y_spacing);
@@ -209,7 +213,7 @@ class xmlConverter{
             "Start": (node) => {
                 return moddle.create("dc:Bounds", {
                     x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0] + default_width - start_stop_dim,
-                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2,
+                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2 + lane_heigth_con[lanes_ids.findIndex(el => el===node.lane_id)],
                     width: start_stop_dim,
                     height: start_stop_dim
                 });
@@ -217,7 +221,7 @@ class xmlConverter{
             "Finish": (node) => {
                 return moddle.create("dc:Bounds", {
                     x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0],
-                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2,
+                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2 + lane_heigth_con[lanes_ids.findIndex(el => el===node.lane_id)],
                     width: start_stop_dim,
                     height: start_stop_dim
                 });
@@ -263,11 +267,28 @@ class xmlConverter{
 
         let planeElement = diagram_nodes.concat(diagram_edges);
 
+        const total_heigth = lane_heigth.reduce((retval, el) => retval + el, 0)
         let bounds2 = moddle.create("dc:Bounds", {
-            x: 10,
-            y: 10,
-            width: 600,
-            height: 200
+            x: default_padding,
+            y: default_padding - 10,
+            width: default_total_width,
+            height: total_heigth
+        });
+
+        lanes_ids.forEach((lane_id, index) => {
+
+            const bounds= moddle.create("dc:Bounds", {
+                x: default_padding + 30,
+                y: default_padding - 10 + lane_heigth_con[index],
+                width: default_total_width - 30,
+                height: lane_heigth[index]
+            });
+            planeElement.push(moddle.create("bpmndi:BPMNShape", {
+                    id: xmlConverter.std_lane_id(lane_id) + "_di",
+                    bpmnElement: {id: xmlConverter.std_lane_id(lane_id)},
+                    bounds
+                })
+            );
         });
 
         planeElement.push(moddle.create("bpmndi:BPMNShape", {
