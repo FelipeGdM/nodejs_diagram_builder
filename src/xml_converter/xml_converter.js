@@ -38,6 +38,10 @@ class xmlConverter{
         }else if(node.type === "Finish"){
             params.incoming = incoming_flows[xmlConverter.std_node_id(node.id)];
             return moddle.create('bpmn:EndEvent', params);
+        } else if (node.type === 'Flow') {
+            params.incoming = incoming_flows[xmlConverter.std_node_id(node.id)];
+            params.outgoing = this.parse_sequence_flow(node);
+            return moddle.create('bpmn:ExclusiveGateway', params)
         }
 
         params.outgoing = [this.parse_sequence_flow(node)];
@@ -67,8 +71,18 @@ class xmlConverter{
             const sourceRef = {id: xmlConverter.std_node_id(node.id) };
             const targetRef = {id: xmlConverter.std_node_id(node.next) };
 
-            return moddle.create('bpmn:SequenceFlow', {id, sourceRef, targetRef});
-        }else{
+            return moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef });
+        } else if (node.type === 'Flow') {
+            const sourceRef = { id: xmlConverter.std_node_id(node.id) };
+            const outgoing = [];
+            for (let value in node.next) {
+                const nextId = node.next[value];
+                const id = xmlConverter.std_flow_id(node.id, nextId)
+                const targetRef = { id: xmlConverter.std_node_id(nextId) };
+                outgoing.push(moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef }));
+            }
+            return outgoing;
+        } else {
             return;
         }
     }
@@ -124,7 +138,7 @@ class xmlConverter{
                 retval.push(parsed);
             }
             return retval;
-        }, []);
+        }, []).flat();
         nodes.forEach(node => incoming_flows[xmlConverter.std_node_id(node.id)] = []);
         this.xml_sequences.forEach(seq => {
             incoming_flows[seq.targetRef.id].push(seq)
