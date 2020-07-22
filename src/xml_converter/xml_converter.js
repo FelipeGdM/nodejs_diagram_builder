@@ -356,8 +356,12 @@ class xmlConverter{
         while(flow_pile.length!==0){
             let curr_node = flow_pile.pop();
 
-            while(id2rank[xmlConverter.std_node_id(curr_node.id)][1] !== -1){
+            while(typeof curr_node === "undefined" && id2rank[xmlConverter.std_node_id(curr_node.id)][1] !== -1){
                 curr_node = flow_pile.pop();
+            }
+
+            if(typeof curr_node === "undefined"){
+                break;
             }
 
             const curr_lane = curr_node.lane_id;
