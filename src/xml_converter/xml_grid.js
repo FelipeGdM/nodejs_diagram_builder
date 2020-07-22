@@ -76,7 +76,6 @@ class Grid{
         for(let column = 0; column < this.size[0]; column++){
             const above_row = Object.keys(this.grid).find((node_id) => this.grid[node_id][0]===column && this.grid[node_id][1]===row);
             const below_row = Object.keys(this.grid).find((node_id) => this.grid[node_id][0]===column && this.grid[node_id][1]===row+1);
-            // console.log(above_row, below_row);
             if(above_row !== undefined && below_row !== undefined){
                 mergeble = false;
                 break;
@@ -87,8 +86,6 @@ class Grid{
         if(!mergeble){
             return false;
         }
-
-        // console.log("Merge is possible!");
 
         new_row.forEach(el => {
             this.grid[el[0]] = [el[1], row];

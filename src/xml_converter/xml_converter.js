@@ -335,7 +335,6 @@ class xmlConverter{
 
         grids[nodes[0].lane_id].add_element(xmlConverter.std_node_id(nodes[0].id), [0,0]);
 
-        // x ranks
         while(fifo.length != 0){
             const curr_node = fifo.pop();
             let list_childs = [];
@@ -395,7 +394,6 @@ class xmlConverter{
             y_depth.push(max_y + 1);
         });
 
-        // console.log("y Dpth", y_depth);
         return {id2rank, y_depth};
     }
 
