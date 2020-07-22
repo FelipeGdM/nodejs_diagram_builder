@@ -388,12 +388,14 @@ class xmlConverter{
         Object.keys(grids).forEach(key => {
             let max_y = 0;
             grids[key].seen_nodes().forEach(node_id => {
+                grids[key].simplify();
                 id2rank[node_id] = grids[key].get_node_pos(node_id);
                 max_y = Math.max(max_y, grids[key].get_size()[1]);
             });
-            y_depth.push(max_y);
+            y_depth.push(max_y + 1);
         });
 
+        // console.log("y Dpth", y_depth);
         return {id2rank, y_depth};
     }
 
