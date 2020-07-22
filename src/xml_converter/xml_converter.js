@@ -1,4 +1,5 @@
 const BpmnModdle = require('bpmn-moddle');
+const Grid = require('./xml_grid');
 const moddle = new BpmnModdle();
 
 class xmlConverter{
@@ -323,17 +324,20 @@ class xmlConverter{
 
         const nodes = spec.nodes;
         const lanes = spec.lanes;
-        const lanes_ids = lanes.map(lane => lane.id).sort((a, b) => a - b);
+        const lanes_ids = lanes.map(lane => lane.id);
 
-        let pile = [];
-        let id2rank = {};
+        let grids = {};
+        lanes_ids.forEach((id) => grids[id] = new Grid());
 
-        pile.push(nodes[0]);
-        id2rank[xmlConverter.std_node_id(nodes[0].id)] = [0,-1];
+        let fifo = [];
+
+        fifo.unshift(nodes[0]);
+
+        grids[nodes[0].lane_id].add_element(xmlConverter.std_node_id(nodes[0].id), [0,0]);
 
         // x ranks
-        while(pile.length != 0){
-            const curr_node = pile.pop();
+        while(fifo.length != 0){
+            const curr_node = fifo.pop();
             let list_childs = [];
 
             switch(typeof curr_node.next){
@@ -359,71 +363,36 @@ class xmlConverter{
                     break;
             }
 
-            list_childs.forEach((child_id)=>{
-                if(typeof id2rank[xmlConverter.std_node_id(child_id)] === "undefined"){
+            const curr_pos = grids[curr_node.lane_id].get_node_pos(xmlConverter.std_node_id(curr_node.id));
+            list_childs.forEach((child_id, index)=>{
+                const child_node = nodes[id2index[child_id]];
+                if(!grids[child_node.lane_id].seen_nodes().includes(xmlConverter.std_node_id(child_id))){
 
-                    id2rank[xmlConverter.std_node_id(child_id)] = [0,-1];
-                    id2rank[xmlConverter.std_node_id(child_id)][0] =
-                        id2rank[xmlConverter.std_node_id(curr_node.id)][0] + 1;
+                    if(index > 0){
+                        grids[child_node.lane_id].add_row_after(index - 1);
+                    }
 
-                    pile.push(nodes[id2index[child_id]]);
+                    let child_pos = [...curr_pos];
+                    child_pos[0] += 1;
+                    child_pos[1] += index;
+
+                    grids[child_node.lane_id].add_element(xmlConverter.std_node_id(child_id), child_pos);
+
+                    fifo.unshift(nodes[id2index[child_id]]);
                 }
             });
         }
 
-        // y ranks
-        let flow_pile = [];
-        let y_depth = lanes_ids.map(() => 0);
-        flow_pile.push(nodes[0]);
-
-        while(flow_pile.length!==0){
-            let curr_node = flow_pile.pop();
-
-            while(typeof curr_node === "undefined" && id2rank[xmlConverter.std_node_id(curr_node.id)][1] !== -1){
-                curr_node = flow_pile.pop();
-            }
-
-            if(typeof curr_node === "undefined"){
-                break;
-            }
-
-            const curr_lane = curr_node.lane_id;
-
-            while(curr_node){
-                if(id2rank[xmlConverter.std_node_id(curr_node.id)][1] !== -1){
-                    break;
-                }
-
-                id2rank[xmlConverter.std_node_id(curr_node.id)][1] =
-                    y_depth[lanes_ids.findIndex(el => el===curr_node.lane_id)];
-
-                switch(typeof curr_node.next){
-                    case "string":
-                        curr_node = nodes[id2index[curr_node.next]];
-                        break;
-
-                    case "object":
-                        if(curr_node.next){
-                            Object.keys(curr_node.next).forEach((key) => {
-                                const next_node = nodes[id2index[curr_node.next[key]]];
-                                if(!flow_pile.includes(next_node)){
-                                    flow_pile.push(next_node);
-                                }
-                            });
-                            curr_node = flow_pile.pop();
-                        }
-                        break;
-
-                    case "undefined":
-                        curr_node = null;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-            y_depth[lanes_ids.findIndex(el => el===curr_lane)] += 1;
-        }
+        let id2rank = {};
+        let y_depth = [];
+        Object.keys(grids).forEach(key => {
+            let max_y = 0;
+            grids[key].seen_nodes().forEach(node_id => {
+                id2rank[node_id] = grids[key].get_node_pos(node_id);
+                max_y = Math.max(max_y, grids[key].get_size()[1]);
+            });
+            y_depth.push(max_y);
+        });
 
         return {id2rank, y_depth};
     }
