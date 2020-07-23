@@ -1,3 +1,17 @@
+/**
+ * @file xml_converter.js
+ *
+ * @brief Loads a json blueprint and build a bpmn xml representation
+ *
+ * @author Felipe Gomes de Melo <felipe.melo@fdte.io>
+ * @author Gabriel Lopes Rodriges <gabriel.rodrigues@fdte.io>
+ *
+ * Based in the paper Kitzmann, Ingo, et al. 2009
+ * "A simple algorithm for automatic layout of bpmn processes."
+ *
+ * To convert a json blueprint, look at build_graph() and to_xml()
+ */
+
 const BpmnModdle = require('bpmn-moddle');
 const Grid = require('./xml_grid');
 const moddle = new BpmnModdle();

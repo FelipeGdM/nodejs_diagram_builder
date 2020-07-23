@@ -1,3 +1,14 @@
+/**
+ * @file xml_grid.js
+ *
+ * @brief Implements the grid class described in (Kitzmann, 2009)
+ *
+ * @author Felipe Gomes de Melo <felipe.melo@fdte.io>
+ * @author Gabriel Lopes Rodriges <gabriel.rodrigues@fdte.io>
+ *
+ * Based in the paper Kitzmann, Ingo, et al. 2009
+ * "A simple algorithm for automatic layout of bpmn processes."
+ */
 
 class Grid{
 
