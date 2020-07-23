@@ -182,8 +182,8 @@ class xmlConverter{
         const nodes = spec.nodes;
         const default_height = 80;
         const default_width = 100;
-        const default_x_margin = 30;
-        const default_y_margin = 30;
+        const default_x_margin = 15;
+        const default_y_margin = 40;
         const default_x_spacing = default_width + 2*default_x_margin;
         const default_y_spacing = default_height + 2*default_y_margin;
         const default_padding = 50;
@@ -193,6 +193,7 @@ class xmlConverter{
         const default_total_width = max_x*default_x_spacing;
 
         const start_stop_dim = 36;
+        const flow_dim = 50;
 
         const lane_heigth = y_depth.map(el => el*default_y_spacing);
 
@@ -229,10 +230,17 @@ class xmlConverter{
                     height: start_stop_dim
                 });
             },
+            "Flow": (node) => {
+                return moddle.create("dc:Bounds", {
+                    x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0] + (default_width - flow_dim)/2,
+                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - flow_dim)/2 + lane_heigth_con[lanes_ids.findIndex(el => el===node.lane_id)],
+                    width: flow_dim,
+                    height: flow_dim
+                });
+            },
             "SystemTask": default_style,
             "UserTask": default_style,
             "ScriptTask": default_style,
-            "Flow": default_style,
         }
 
         const bounds_array = {};
@@ -256,10 +264,10 @@ class xmlConverter{
                 points_list.push([sourceRef.x + sourceRef.width,
                     sourceRef.y + sourceRef.height/2]);
 
-                points_list.push([sourceRef.x + sourceRef.width + default_x_margin/3,
+                points_list.push([sourceRef.x + (sourceRef.width+default_width)/2 + default_x_margin/1.5,
                     sourceRef.y + sourceRef.height/2]);
 
-                points_list.push([sourceRef.x + sourceRef.width + default_x_margin/3,
+                points_list.push([sourceRef.x + (sourceRef.width+default_width)/2 + default_x_margin/1.5,
                     targetRef.y + targetRef.height/2]);
 
                 points_list.push([targetRef.x,
@@ -270,10 +278,10 @@ class xmlConverter{
                     sourceRef.y + sourceRef.height]);
 
                 points_list.push([sourceRef.x + sourceRef.width/2,
-                    sourceRef.y + sourceRef.height + default_y_margin/3]);
+                    sourceRef.y + (sourceRef.height+default_height)/2 + default_y_margin/1.5]);
 
                 points_list.push([targetRef.x + targetRef.width/2,
-                    sourceRef.y + sourceRef.height + default_y_margin/3]);
+                    sourceRef.y + (sourceRef.height+default_height)/2 + default_y_margin/1.5]);
 
                 points_list.push([targetRef.x + targetRef.width/2,
                     targetRef.y]);
@@ -283,10 +291,10 @@ class xmlConverter{
                     sourceRef.y + sourceRef.height]);
 
                 points_list.push([sourceRef.x + sourceRef.width/2,
-                    sourceRef.y + sourceRef.height + default_y_margin/3]);
+                    sourceRef.y +  (sourceRef.height+default_height)/2 + default_y_margin/2]);
 
                 points_list.push([targetRef.x + targetRef.width/2,
-                    sourceRef.y + sourceRef.height + default_y_margin/3]);
+                    sourceRef.y +  (sourceRef.height+default_height)/2 + default_y_margin/2]);
 
                 points_list.push([targetRef.x + targetRef.width/2,
                     targetRef.y + targetRef.height]);
