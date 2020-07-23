@@ -264,10 +264,10 @@ class xmlConverter{
                 points_list.push([sourceRef.x + sourceRef.width,
                     sourceRef.y + sourceRef.height/2]);
 
-                points_list.push([sourceRef.x + (sourceRef.width+default_width)/2 + default_x_margin/1.5,
+                points_list.push([sourceRef.x + sourceRef.width + default_x_margin/1.5,
                     sourceRef.y + sourceRef.height/2]);
 
-                points_list.push([sourceRef.x + (sourceRef.width+default_width)/2 + default_x_margin/1.5,
+                points_list.push([sourceRef.x + sourceRef.width + default_x_margin/1.5,
                     targetRef.y + targetRef.height/2]);
 
                 points_list.push([targetRef.x,
@@ -278,10 +278,10 @@ class xmlConverter{
                     sourceRef.y + sourceRef.height]);
 
                 points_list.push([sourceRef.x + sourceRef.width/2,
-                    sourceRef.y + (sourceRef.height+default_height)/2 + default_y_margin/1.5]);
+                    sourceRef.y + sourceRef.height + default_y_margin/1.5]);
 
                 points_list.push([targetRef.x + targetRef.width/2,
-                    sourceRef.y + (sourceRef.height+default_height)/2 + default_y_margin/1.5]);
+                    sourceRef.y + sourceRef.height + default_y_margin/1.5]);
 
                 points_list.push([targetRef.x + targetRef.width/2,
                     targetRef.y]);
@@ -291,10 +291,10 @@ class xmlConverter{
                     sourceRef.y + sourceRef.height]);
 
                 points_list.push([sourceRef.x + sourceRef.width/2,
-                    sourceRef.y +  (sourceRef.height+default_height)/2 + default_y_margin/2]);
+                    sourceRef.y +  sourceRef.height + default_y_margin/2]);
 
                 points_list.push([targetRef.x + targetRef.width/2,
-                    sourceRef.y +  (sourceRef.height+default_height)/2 + default_y_margin/2]);
+                    sourceRef.y +  sourceRef.height + default_y_margin/2]);
 
                 points_list.push([targetRef.x + targetRef.width/2,
                     targetRef.y + targetRef.height]);
