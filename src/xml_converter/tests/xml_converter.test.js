@@ -201,60 +201,65 @@ describe('parsing tests', function () {
   });
 
   describe('xml generator', function(){
-
-    const expected_xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI">' +
-      '<bpmn:process id="Global_Process" isExecutable="true">' +
-        '<bpmn:laneSet id="Global_LaneSet">' +
-          '<bpmn:lane id="Lane_99">' +
-            '<bpmn:flowNodeRef>Node_1</bpmn:flowNodeRef>' +
-            '<bpmn:flowNodeRef>Node_2</bpmn:flowNodeRef>' +
-            '<bpmn:flowNodeRef>Node_99</bpmn:flowNodeRef>' +
-          '</bpmn:lane>' +
-        '</bpmn:laneSet>' +
-        '<bpmn:startEvent id="Node_1" name="Start_node">' +
-          '<bpmn:outgoing>Flow_1_2</bpmn:outgoing>' +
-        '</bpmn:startEvent>' +
-        '<bpmn:serviceTask id="Node_2" name="Set_to_bag_node">' +
-          '<bpmn:incoming>Flow_1_2</bpmn:incoming>' +
-          '<bpmn:outgoing>Flow_2_99</bpmn:outgoing>' +
-        '</bpmn:serviceTask>' +
-        '<bpmn:endEvent id="Node_99" name="Finish_node">' +
-          '<bpmn:incoming>Flow_2_99</bpmn:incoming>' +
-        '</bpmn:endEvent>' +
-        '<bpmn:sequenceFlow id="Flow_1_2" sourceRef="Node_1" targetRef="Node_2" />' +
-        '<bpmn:sequenceFlow id="Flow_2_99" sourceRef="Node_2" targetRef="Node_99" />' +
-      '</bpmn:process>' +
-      '<bpmn:collaboration id="Global_Colab">' +
-        '<bpmn:participant id="Global_Actor" processRef="Global_Process" />' +
-      '</bpmn:collaboration>' +
-      '<bpmndi:BPMNDiagram id="Global_Diagram">' +
-        '<bpmndi:BPMNPlane id="Global_Plane" bpmnElement="Global_Colab">' +
-          '<bpmndi:BPMNShape id="Node_1_di" bpmnElement="Node_1">' +
-            '<dc:Bounds x="114" y="72" width="36" height="36" />' +
-          '</bpmndi:BPMNShape>' +
-          '<bpmndi:BPMNShape id="Node_2_di" bpmnElement="Node_2">' +
-            '<dc:Bounds x="170" y="50" width="100" height="80" />' +
-          '</bpmndi:BPMNShape>' +
-          '<bpmndi:BPMNShape id="Node_99_di" bpmnElement="Node_99">' +
-            '<dc:Bounds x="290" y="72" width="36" height="36" />' +
-          '</bpmndi:BPMNShape>' +
-          '<bpmndi:BPMNEdge id="Flow_1_2_di" bpmnElement="Flow_1_2">' +
-            '<di:waypoint x="150" y="90" />' +
-            '<di:waypoint x="170" y="90" />' +
-          '</bpmndi:BPMNEdge>' +
-          '<bpmndi:BPMNEdge id="Flow_2_99_di" bpmnElement="Flow_2_99">' +
-            '<di:waypoint x="270" y="90" />' +
-            '<di:waypoint x="290" y="90" />' +
-          '</bpmndi:BPMNEdge>' +
-          '<bpmndi:BPMNShape id="Global_Actor_di" bpmnElement="Global_Actor">' +
-            '<dc:Bounds x="10" y="10" width="600" height="200" />' +
-          '</bpmndi:BPMNShape>' +
-        '</bpmndi:BPMNPlane>' +
-      '</bpmndi:BPMNDiagram>' +
-    '</bpmn:definitions>'
-
     it('simple workflow', async function(){
+
+      const expected_xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI">' +
+        '<bpmn:process id="Global_Process" isExecutable="true">' +
+          '<bpmn:laneSet id="Global_LaneSet">' +
+            '<bpmn:lane id="Lane_99">' +
+              '<bpmn:flowNodeRef>Node_1</bpmn:flowNodeRef>' +
+              '<bpmn:flowNodeRef>Node_2</bpmn:flowNodeRef>' +
+              '<bpmn:flowNodeRef>Node_99</bpmn:flowNodeRef>' +
+            '</bpmn:lane>' +
+          '</bpmn:laneSet>' +
+          '<bpmn:startEvent id="Node_1" name="Start_node">' +
+            '<bpmn:outgoing>Flow_1_2</bpmn:outgoing>' +
+          '</bpmn:startEvent>' +
+          '<bpmn:serviceTask id="Node_2" name="Set_to_bag_node">' +
+            '<bpmn:incoming>Flow_1_2</bpmn:incoming>' +
+            '<bpmn:outgoing>Flow_2_99</bpmn:outgoing>' +
+          '</bpmn:serviceTask>' +
+          '<bpmn:endEvent id="Node_99" name="Finish_node">' +
+            '<bpmn:incoming>Flow_2_99</bpmn:incoming>' +
+          '</bpmn:endEvent>' +
+          '<bpmn:sequenceFlow id="Flow_1_2" sourceRef="Node_1" targetRef="Node_2" />' +
+          '<bpmn:sequenceFlow id="Flow_2_99" sourceRef="Node_2" targetRef="Node_99" />' +
+        '</bpmn:process>' +
+        '<bpmn:collaboration id="Global_Colab">' +
+          '<bpmn:participant id="Global_Actor" processRef="Global_Process" />' +
+        '</bpmn:collaboration>' +
+        '<bpmndi:BPMNDiagram id="Global_Diagram">' +
+          '<bpmndi:BPMNPlane id="Global_Plane" bpmnElement="Global_Colab">' +
+            '<bpmndi:BPMNShape id="Node_1_di" bpmnElement="Node_1">' +
+              '<dc:Bounds x="114" y="72" width="36" height="36" />' +
+            '</bpmndi:BPMNShape>' +
+            '<bpmndi:BPMNShape id="Node_2_di" bpmnElement="Node_2">' +
+              '<dc:Bounds x="180" y="50" width="100" height="80" />' +
+            '</bpmndi:BPMNShape>' +
+            '<bpmndi:BPMNShape id="Node_99_di" bpmnElement="Node_99">' +
+              '<dc:Bounds x="310" y="72" width="36" height="36" />' +
+            '</bpmndi:BPMNShape>' +
+            '<bpmndi:BPMNEdge id="Flow_1_2_di" bpmnElement="Flow_1_2">' +
+              '<di:waypoint x="150" y="90" />' +
+              '<di:waypoint x="160" y="90" /><di:waypoint x="160" y="90" /><di:waypoint x="180" y="90" />' +
+            '</bpmndi:BPMNEdge>' +
+            '<bpmndi:BPMNEdge id="Flow_2_99_di" bpmnElement="Flow_2_99">' +
+              '<di:waypoint x="280" y="90" />' +
+              '<di:waypoint x="290" y="90" />' +
+              '<di:waypoint x="290" y="90" />' +
+              '<di:waypoint x="310" y="90" />' +
+            '</bpmndi:BPMNEdge>' +
+            '<bpmndi:BPMNShape id="Lane_99_di" bpmnElement="Lane_99">' +
+              '<dc:Bounds x="80" y="10" width="360" height="160" />' +
+            '</bpmndi:BPMNShape>' +
+            '<bpmndi:BPMNShape id="Global_Actor_di" bpmnElement="Global_Actor">' +
+              '<dc:Bounds x="50" y="10" width="390" height="160" />' +
+            '</bpmndi:BPMNShape>' +
+          '</bpmndi:BPMNPlane>' +
+        '</bpmndi:BPMNDiagram>' +
+      '</bpmn:definitions>'
+
       converter.build_graph(simple_workflow.blueprint_spec);
       const retval = await converter.to_xml();
       expect(retval).toBe(expected_xml);
