@@ -104,14 +104,15 @@ class xmlConverter {
         }
     }
 
-    build_graph(blueprint_spec) {
+    build_graph(blueprint_spec, name = null) {
         if (!xmlConverter.validate(blueprint_spec)) {
             throw new Error('Invalid spec: no nodes or no lanes.');
         };
 
         this.xml_participant = moddle.create("bpmn:Participant", {
             id: "Global_Actor",
-            processRef: { id: "Global_Process" }
+            processRef: { id: "Global_Process" },
+            name
         });
 
         this.xml_collab = moddle.create("bpmn:Collaboration", {

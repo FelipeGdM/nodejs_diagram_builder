@@ -171,9 +171,9 @@ describe('parsing tests', function () {
     it("Create participant tag", async function () {
 
       const expectedXML = '<bpmn:participant xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
-        'id="Global_Actor" processRef="Global_Process" />';
+        'id="Global_Actor" name="SIMPLE_WORKFLOW" processRef="Global_Process" />';
 
-      das_converter.build_graph(simple_workflow.blueprint_spec);
+      das_converter.build_graph(simple_workflow.blueprint_spec, simple_workflow.name);
       const { xml } = await write(das_converter.xml_participant);
       expect(xml).toEqual(expectedXML);
 
@@ -183,10 +183,10 @@ describe('parsing tests', function () {
 
       const expectedXML = '<bpmn:collaboration xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
         'id="Global_Colab">' +
-        '<bpmn:participant id="Global_Actor" processRef="Global_Process" />' +
+        '<bpmn:participant id="Global_Actor" name="SIMPLE_WORKFLOW" processRef="Global_Process" />' +
         '</bpmn:collaboration>';
 
-      das_converter.build_graph(simple_workflow.blueprint_spec);
+      das_converter.build_graph(simple_workflow.blueprint_spec, simple_workflow.name);
       const { xml } = await write(das_converter.xml_collab);
       expect(xml).toEqual(expectedXML);
 
