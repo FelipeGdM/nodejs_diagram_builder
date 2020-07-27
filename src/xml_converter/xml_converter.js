@@ -1,4 +1,19 @@
+/**
+ * @file xml_converter.js
+ *
+ * @brief Loads a json blueprint and build a bpmn xml representation
+ *
+ * @author Felipe Gomes de Melo <felipe.melo@fdte.io>
+ * @author Gabriel Lopes Rodriges <gabriel.rodrigues@fdte.io>
+ *
+ * Based in the paper Kitzmann, Ingo, et al. 2009
+ * "A simple algorithm for automatic layout of bpmn processes."
+ *
+ * To convert a json blueprint, look at build_graph() and to_xml()
+ */
+
 const BpmnModdle = require('bpmn-moddle');
+const Grid = require('./xml_grid');
 const moddle = new BpmnModdle();
 
 class xmlConverter{
@@ -78,8 +93,10 @@ class xmlConverter{
             for (let value in node.next) {
                 const nextId = node.next[value];
                 const id = xmlConverter.std_flow_id(node.id, nextId)
-                const targetRef = { id: xmlConverter.std_node_id(nextId) };
-                outgoing.push(moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef }));
+                if(outgoing.findIndex(el => el.id === id) === -1){
+                    const targetRef = { id: xmlConverter.std_node_id(nextId) };
+                    outgoing.push(moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef }));
+                }
             }
             return outgoing;
         } else {
@@ -179,11 +196,18 @@ class xmlConverter{
         const nodes = spec.nodes;
         const default_height = 80;
         const default_width = 100;
-        const default_x_spacing = default_width + 20;
-        const default_y_spacing = default_height + 20;
+        const default_x_margin = 15;
+        const default_y_margin = 40;
+        const default_x_spacing = default_width + 2*default_x_margin;
+        const default_y_spacing = default_height + 2*default_y_margin;
         const default_padding = 50;
 
+        const max_x = 1 + Object.keys(id2rank).reduce((max, id) => Math.max(max, id2rank[id][0]), 0);
+
+        const default_total_width = max_x*default_x_spacing;
+
         const start_stop_dim = 36;
+        const flow_dim = 50;
 
         const lane_heigth = y_depth.map(el => el*default_y_spacing);
 
@@ -207,7 +231,7 @@ class xmlConverter{
             "Start": (node) => {
                 return moddle.create("dc:Bounds", {
                     x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0] + default_width - start_stop_dim,
-                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2,
+                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2 + lane_heigth_con[lanes_ids.findIndex(el => el===node.lane_id)],
                     width: start_stop_dim,
                     height: start_stop_dim
                 });
@@ -215,15 +239,22 @@ class xmlConverter{
             "Finish": (node) => {
                 return moddle.create("dc:Bounds", {
                     x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0],
-                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2,
+                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim)/2 + lane_heigth_con[lanes_ids.findIndex(el => el===node.lane_id)],
                     width: start_stop_dim,
                     height: start_stop_dim
+                });
+            },
+            "Flow": (node) => {
+                return moddle.create("dc:Bounds", {
+                    x: default_padding + default_x_spacing*id2rank[xmlConverter.std_node_id(node.id)][0] + (default_width - flow_dim)/2,
+                    y: default_padding + default_y_spacing*id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - flow_dim)/2 + lane_heigth_con[lanes_ids.findIndex(el => el===node.lane_id)],
+                    width: flow_dim,
+                    height: flow_dim
                 });
             },
             "SystemTask": default_style,
             "UserTask": default_style,
             "ScriptTask": default_style,
-            "Flow": default_style,
         }
 
         const bounds_array = {};
@@ -241,17 +272,58 @@ class xmlConverter{
             });
         });
 
+        const generate_waypoints = (sourceRef, targetRef) => {
+            let points_list = [];
+            if(sourceRef.x < targetRef.x){
+                points_list.push([sourceRef.x + sourceRef.width,
+                    sourceRef.y + sourceRef.height/2]);
+
+                points_list.push([sourceRef.x + sourceRef.width + default_x_margin/1.5,
+                    sourceRef.y + sourceRef.height/2]);
+
+                points_list.push([sourceRef.x + sourceRef.width + default_x_margin/1.5,
+                    targetRef.y + targetRef.height/2]);
+
+                points_list.push([targetRef.x,
+                    targetRef.y + targetRef.height/2]);
+
+            }else if(sourceRef.y < targetRef.y){
+                points_list.push([sourceRef.x + sourceRef.width/2,
+                    sourceRef.y + sourceRef.height]);
+
+                points_list.push([sourceRef.x + sourceRef.width/2,
+                    sourceRef.y + sourceRef.height + default_y_margin/1.5]);
+
+                points_list.push([targetRef.x + targetRef.width/2,
+                    sourceRef.y + sourceRef.height + default_y_margin/1.5]);
+
+                points_list.push([targetRef.x + targetRef.width/2,
+                    targetRef.y]);
+
+            }else if(sourceRef.y > targetRef.y){
+                points_list.push([sourceRef.x + sourceRef.width/2,
+                    sourceRef.y + sourceRef.height]);
+
+                points_list.push([sourceRef.x + sourceRef.width/2,
+                    sourceRef.y +  sourceRef.height + default_y_margin/2]);
+
+                points_list.push([targetRef.x + targetRef.width/2,
+                    sourceRef.y +  sourceRef.height + default_y_margin/2]);
+
+                points_list.push([targetRef.x + targetRef.width/2,
+                    targetRef.y + targetRef.height]);
+            }else{
+                points_list.push([sourceRef.x + sourceRef.width,
+                    sourceRef.y + sourceRef.height/2]);
+
+                points_list.push([targetRef.x,
+                    targetRef.y + targetRef.height/2]);
+            }
+            return points_list.map(el => moddle.create("dc:Point", {x: el[0], y: el[1]}));
+        }
+
         const diagram_edges = xml_sequences.map((seq) => {
-            let waypoint = [
-                moddle.create("dc:Point",
-                {
-                    x: bounds_array[seq.sourceRef.id].x + bounds_array[seq.sourceRef.id].width,
-                    y: bounds_array[seq.sourceRef.id].y + bounds_array[seq.sourceRef.id].height/2
-                }),
-                moddle.create("dc:Point", {
-                    x: bounds_array[seq.targetRef.id].x,
-                    y: bounds_array[seq.targetRef.id].y + bounds_array[seq.targetRef.id].height/2
-                })];
+            let waypoint = generate_waypoints(bounds_array[seq.sourceRef.id], bounds_array[seq.targetRef.id]);
             return moddle.create("bpmndi:BPMNEdge", {
                 id: seq.id + "_di",
                 bpmnElement: {id: seq.id},
@@ -261,11 +333,28 @@ class xmlConverter{
 
         let planeElement = diagram_nodes.concat(diagram_edges);
 
+        const total_heigth = lane_heigth.reduce((retval, el) => retval + el, 0)
         let bounds2 = moddle.create("dc:Bounds", {
-            x: 10,
-            y: 10,
-            width: 600,
-            height: 200
+            x: default_padding,
+            y: default_padding - default_y_margin,
+            width: default_total_width,
+            height: total_heigth
+        });
+
+        lanes_ids.forEach((lane_id, index) => {
+
+            const bounds= moddle.create("dc:Bounds", {
+                x: default_padding + 30,
+                y: default_padding - default_y_margin + lane_heigth_con[index],
+                width: default_total_width - 30,
+                height: lane_heigth[index]
+            });
+            planeElement.push(moddle.create("bpmndi:BPMNShape", {
+                    id: xmlConverter.std_lane_id(lane_id) + "_di",
+                    bpmnElement: {id: xmlConverter.std_lane_id(lane_id)},
+                    bounds
+                })
+            );
         });
 
         planeElement.push(moddle.create("bpmndi:BPMNShape", {
@@ -298,17 +387,19 @@ class xmlConverter{
 
         const nodes = spec.nodes;
         const lanes = spec.lanes;
-        const lanes_ids = lanes.map(lane => lane.id).sort((a, b) => a - b);
+        const lanes_ids = lanes.map(lane => lane.id);
 
-        let pile = [];
-        let id2rank = {};
+        let grids = {};
+        lanes_ids.forEach((id) => grids[id] = new Grid());
 
-        pile.push(nodes[0]);
-        id2rank[xmlConverter.std_node_id(nodes[0].id)] = [0,-1];
+        let fifo = [];
 
-        // x ranks
-        while(pile.length != 0){
-            const curr_node = pile.pop();
+        fifo.unshift(nodes[0]);
+
+        grids[nodes[0].lane_id].add_element(xmlConverter.std_node_id(nodes[0].id), [0,0]);
+
+        while(fifo.length != 0){
+            const curr_node = fifo.pop();
             let list_childs = [];
 
             switch(typeof curr_node.next){
@@ -334,67 +425,37 @@ class xmlConverter{
                     break;
             }
 
-            list_childs.forEach((child_id)=>{
-                if(typeof id2rank[xmlConverter.std_node_id(child_id)] === "undefined"){
+            const curr_pos = grids[curr_node.lane_id].get_node_pos(xmlConverter.std_node_id(curr_node.id));
+            list_childs.forEach((child_id, index)=>{
+                const child_node = nodes[id2index[child_id]];
+                if(!grids[child_node.lane_id].seen_nodes().includes(xmlConverter.std_node_id(child_id))){
 
-                    id2rank[xmlConverter.std_node_id(child_id)] = [0,-1];
-                    id2rank[xmlConverter.std_node_id(child_id)][0] =
-                        id2rank[xmlConverter.std_node_id(curr_node.id)][0] + 1;
+                    if(index > 0){
+                        grids[child_node.lane_id].add_row_after(index - 1);
+                    }
 
-                    pile.push(nodes[id2index[child_id]]);
+                    let child_pos = [...curr_pos];
+                    child_pos[0] += 1;
+                    child_pos[1] += index;
+
+                    grids[child_node.lane_id].add_element(xmlConverter.std_node_id(child_id), child_pos);
+
+                    fifo.unshift(nodes[id2index[child_id]]);
                 }
             });
         }
 
-        // y ranks
-        let flow_pile = [];
-        let y_depth = lanes_ids.map(() => 0);
-        flow_pile.push(nodes[0]);
-
-        while(flow_pile.length!==0){
-            let curr_node = flow_pile.pop();
-
-            while(id2rank[xmlConverter.std_node_id(curr_node.id)][1] !== -1){
-                curr_node = flow_pile.pop();
-            }
-
-            const curr_lane = curr_node.lane_id;
-
-            while(curr_node){
-                if(id2rank[xmlConverter.std_node_id(curr_node.id)][1] !== -1){
-                    break;
-                }
-
-                id2rank[xmlConverter.std_node_id(curr_node.id)][1] =
-                    y_depth[lanes_ids.findIndex(el => el===curr_node.lane_id)];
-
-                switch(typeof curr_node.next){
-                    case "string":
-                        curr_node = nodes[id2index[curr_node.next]];
-                        break;
-
-                    case "object":
-                        if(curr_node.next){
-                            Object.keys(curr_node.next).forEach((key) => {
-                                const next_node = nodes[id2index[curr_node.next[key]]];
-                                if(!flow_pile.includes(next_node)){
-                                    flow_pile.push(next_node);
-                                }
-                            });
-                            curr_node = flow_pile.pop();
-                        }
-                        break;
-
-                    case "undefined":
-                        curr_node = null;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-            y_depth[lanes_ids.findIndex(el => el===curr_lane)] += 1;
-        }
+        let id2rank = {};
+        let y_depth = [];
+        Object.keys(grids).forEach(key => {
+            let max_y = 0;
+            grids[key].seen_nodes().forEach(node_id => {
+                grids[key].simplify();
+                id2rank[node_id] = grids[key].get_node_pos(node_id);
+                max_y = Math.max(max_y, grids[key].get_size()[1]);
+            });
+            y_depth.push(max_y + 1);
+        });
 
         return {id2rank, y_depth};
     }
