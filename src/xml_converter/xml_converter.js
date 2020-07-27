@@ -183,7 +183,7 @@ class xmlConverter {
                 flowNodeRef.push({ id: xmlConverter.std_node_id(node.id) });
             }
         });
-        return moddle.create('bpmn:Lane', { id, flowNodeRef });
+        return moddle.create('bpmn:Lane', { id, flowNodeRef, name: lane.name });
     }
 
     build_laneset(nodes, lanes) {

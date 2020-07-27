@@ -46,7 +46,7 @@ describe('parsing tests', function () {
       const expectedXML = '<bpmn:process xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Global_Process" ' +
         'isExecutable="true">' +
         '<bpmn:laneSet id="Global_LaneSet">' +
-        '<bpmn:lane id="Lane_1">' +
+        '<bpmn:lane id="Lane_1" name="default">' +
         '<bpmn:flowNodeRef>Node_1</bpmn:flowNodeRef>' +
         '<bpmn:flowNodeRef>Node_2</bpmn:flowNodeRef>' +
         '<bpmn:flowNodeRef>Node_3</bpmn:flowNodeRef>' +
