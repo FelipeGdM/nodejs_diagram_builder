@@ -129,7 +129,7 @@ class xmlConverter {
 
         this.xml_laneset = this.build_laneset(blueprint_spec.nodes, blueprint_spec.lanes);
 
-        const flowElements = this.xml_nodes.concat(this.xml_sequences.flat());
+        const flowElements = this.xml_nodes.concat(this.xml_sequences);
         this.xml_process = moddle.create("bpmn:Process", {
             // id: "Process_01zyiho",
             id: "Global_Process",
