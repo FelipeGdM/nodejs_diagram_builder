@@ -345,17 +345,9 @@ class xmlConverter{
 
         let planeElement = diagram_nodes.concat(diagram_edges);
 
-        const total_heigth = lane_heigth.reduce((retval, el) => retval + el, 0)
-        let bounds2 = moddle.create("dc:Bounds", {
-            x: default_padding,
-            y: default_padding - default_y_margin,
-            width: default_total_width,
-            height: total_heigth
-        });
-
         lanes_ids.forEach((lane_id, index) => {
 
-            const bounds= moddle.create("dc:Bounds", {
+            const bounds = moddle.create("dc:Bounds", {
                 x: default_padding + 30,
                 y: default_padding - default_y_margin + lane_heigth_con[index],
                 width: default_total_width - 30,
@@ -369,10 +361,18 @@ class xmlConverter{
             );
         });
 
+        const total_heigth = lane_heigth.reduce((retval, el) => retval + el, 0)
+        const bounds = moddle.create("dc:Bounds", {
+            x: default_padding,
+            y: default_padding - default_y_margin,
+            width: default_total_width,
+            height: total_heigth
+        });
+
         planeElement.push(moddle.create("bpmndi:BPMNShape", {
             id: "Global_Actor_di",
             bpmnElement: {id: "Global_Actor"},
-            bounds: bounds2
+            bounds
         }));
 
         const plane = moddle.create("bpmndi:BPMNPlane", {
