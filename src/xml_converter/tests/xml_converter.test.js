@@ -6,6 +6,7 @@ const moddle = new BpmnModdle();
 
 const simple_workflow = require('./blueprints/simple_workflow');
 const script_example = require('./blueprints/script_example');
+const lanes_example = require('./blueprints/lanes_example');
 
 const start_node = simple_workflow.blueprint_spec.nodes[0];
 const system_task_node = simple_workflow.blueprint_spec.nodes[1];
@@ -121,13 +122,12 @@ describe('parsing tests', function () {
 
   describe('lane parser', function () {
 
-    const das_converter = new xmlConverter();
-
     it("Start node", async function () {
+      const das_converter = new xmlConverter();
 
       const expectedXML = '<bpmn:laneSet xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
         'id="Global_LaneSet">' +
-        '<bpmn:lane id=\"Lane_99\">' +
+        '<bpmn:lane id="Lane_99" name="everyone">' +
         '<bpmn:flowNodeRef>Node_1</bpmn:flowNodeRef>' +
         '<bpmn:flowNodeRef>Node_2</bpmn:flowNodeRef>' +
         '<bpmn:flowNodeRef>Node_99</bpmn:flowNodeRef>' +
@@ -140,6 +140,28 @@ describe('parsing tests', function () {
       expect(xml).toEqual(expectedXML);
 
     });
+
+    it("should parse 2 lanes with their names", async function () {
+      const das_converter = new xmlConverter();
+
+      const expectedXML = '<bpmn:laneSet xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
+        'id="Global_LaneSet">' +
+        '<bpmn:lane id=\"Lane_1\" name="initialLane">' +
+        '<bpmn:flowNodeRef>Node_1</bpmn:flowNodeRef>' +
+        '<bpmn:flowNodeRef>Node_2</bpmn:flowNodeRef>' +
+        '</bpmn:lane>' +
+        '<bpmn:lane id=\"Lane_2\" name="finalLane">' +
+        '<bpmn:flowNodeRef>Node_3</bpmn:flowNodeRef>' +
+        '<bpmn:flowNodeRef>Node_99</bpmn:flowNodeRef>' +
+        '</bpmn:lane>' +
+        '</bpmn:laneSet>';
+
+      das_converter.build_graph(lanes_example.blueprint_spec);
+
+      const { xml } = await write(das_converter.xml_laneset);
+      expect(xml).toEqual(expectedXML);
+
+    })
   });
 
   describe('collab parser', function () {
@@ -149,9 +171,9 @@ describe('parsing tests', function () {
     it("Create participant tag", async function () {
 
       const expectedXML = '<bpmn:participant xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
-        'id="Global_Actor" processRef="Global_Process" />';
+        'id="Global_Actor" name="SIMPLE_WORKFLOW" processRef="Global_Process" />';
 
-      das_converter.build_graph(simple_workflow.blueprint_spec);
+      das_converter.build_graph(simple_workflow.blueprint_spec, simple_workflow.name);
       const { xml } = await write(das_converter.xml_participant);
       expect(xml).toEqual(expectedXML);
 
@@ -161,10 +183,10 @@ describe('parsing tests', function () {
 
       const expectedXML = '<bpmn:collaboration xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
         'id="Global_Colab">' +
-        '<bpmn:participant id="Global_Actor" processRef="Global_Process" />' +
+        '<bpmn:participant id="Global_Actor" name="SIMPLE_WORKFLOW" processRef="Global_Process" />' +
         '</bpmn:collaboration>';
 
-      das_converter.build_graph(simple_workflow.blueprint_spec);
+      das_converter.build_graph(simple_workflow.blueprint_spec, simple_workflow.name);
       const { xml } = await write(das_converter.xml_collab);
       expect(xml).toEqual(expectedXML);
 
@@ -173,7 +195,7 @@ describe('parsing tests', function () {
     it("Build process tag", async function () {
 
       const expectedXML = '<bpmn:process xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Global_Process" isExecutable="true">' + '<bpmn:laneSet id="Global_LaneSet">' +
-        '<bpmn:lane id="Lane_99">' +
+        '<bpmn:lane id="Lane_99" name="everyone">' +
         '<bpmn:flowNodeRef>Node_1</bpmn:flowNodeRef>' +
         '<bpmn:flowNodeRef>Node_2</bpmn:flowNodeRef>' +
         '<bpmn:flowNodeRef>Node_99</bpmn:flowNodeRef>' +
@@ -207,7 +229,7 @@ describe('parsing tests', function () {
       '<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI">' +
         '<bpmn:process id="Global_Process" isExecutable="true">' +
           '<bpmn:laneSet id="Global_LaneSet">' +
-            '<bpmn:lane id="Lane_99">' +
+            '<bpmn:lane id="Lane_99" name="everyone">' +
               '<bpmn:flowNodeRef>Node_1</bpmn:flowNodeRef>' +
               '<bpmn:flowNodeRef>Node_2</bpmn:flowNodeRef>' +
               '<bpmn:flowNodeRef>Node_99</bpmn:flowNodeRef>' +
