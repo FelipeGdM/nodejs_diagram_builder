@@ -258,8 +258,14 @@ class xmlConverter{
         }
 
         const bounds_array = {};
-        nodes.forEach((node) =>
-            bounds_array[xmlConverter.std_node_id(node.id)] = bounds_style[node.type](node));
+        nodes.forEach((node) => {
+            try {
+                bounds_array[xmlConverter.std_node_id(node.id)] = bounds_style[node.type](node);
+            } catch (e) {
+                console.log('Error in node ', node.id);
+                console.log(e);
+            }
+        });
 
         const diagram_nodes = nodes.map((node) => {
 
@@ -323,7 +329,13 @@ class xmlConverter{
         }
 
         const diagram_edges = xml_sequences.map((seq) => {
-            let waypoint = generate_waypoints(bounds_array[seq.sourceRef.id], bounds_array[seq.targetRef.id]);
+            let waypoint = [];
+            try {
+                waypoint = generate_waypoints(bounds_array[seq.sourceRef.id], bounds_array[seq.targetRef.id]);
+            } catch (e) {
+                console.log('Error parsing edge ', seq);
+                console.log(e);
+            }
             return moddle.create("bpmndi:BPMNEdge", {
                 id: seq.id + "_di",
                 bpmnElement: {id: seq.id},
