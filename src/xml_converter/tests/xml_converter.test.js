@@ -229,7 +229,7 @@ describe('parsing tests', function () {
       '<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI">' +
         '<bpmn:process id="Global_Process" isExecutable="true">' +
           '<bpmn:laneSet id="Global_LaneSet">' +
-            '<bpmn:lane id="Lane_99">' +
+            '<bpmn:lane id="Lane_99" name="everyone">' +
               '<bpmn:flowNodeRef>Node_1</bpmn:flowNodeRef>' +
               '<bpmn:flowNodeRef>Node_2</bpmn:flowNodeRef>' +
               '<bpmn:flowNodeRef>Node_99</bpmn:flowNodeRef>' +
