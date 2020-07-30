@@ -21,9 +21,11 @@
 const BpmnModdle = require('bpmn-moddle');
 const Grid = require('./xml_grid');
 
-const moddle = new BpmnModdle();
-
 class xmlConverter {
+  constructor() {
+    this.moddle = new BpmnModdle();
+  }
+
   static validate(spec) {
     if (!spec.nodes || !spec.lanes) {
       return false;
@@ -55,14 +57,14 @@ class xmlConverter {
 
     if (node.type === 'Start') {
       params.outgoing = this.parse_sequence_flow(node);
-      return moddle.create('bpmn:StartEvent', params);
+      return this.moddle.create('bpmn:StartEvent', params);
     } if (node.type === 'Finish') {
       params.incoming = incoming_flows[xmlConverter.std_node_id(node.id)];
-      return moddle.create('bpmn:EndEvent', params);
+      return this.moddle.create('bpmn:EndEvent', params);
     } if (node.type === 'Flow') {
       params.incoming = incoming_flows[xmlConverter.std_node_id(node.id)];
       params.outgoing = this.parse_sequence_flow(node);
-      return moddle.create('bpmn:ExclusiveGateway', params);
+      return this.moddle.create('bpmn:ExclusiveGateway', params);
     }
 
     params.outgoing = this.parse_sequence_flow(node);
@@ -70,16 +72,16 @@ class xmlConverter {
 
     switch (node.type) {
       case 'SystemTask':
-        return moddle.create('bpmn:ServiceTask', params);
+        return this.moddle.create('bpmn:ServiceTask', params);
 
       case 'UserTask':
-        return moddle.create('bpmn:UserTask', params);
+        return this.moddle.create('bpmn:UserTask', params);
 
       case 'ScriptTask':
-        return moddle.create('bpmn:ScriptTask', params);
+        return this.moddle.create('bpmn:ScriptTask', params);
 
       default:
-        return moddle.create('bpmn:Task', params);
+        return this.moddle.create('bpmn:Task', params);
     }
   }
 
@@ -91,7 +93,7 @@ class xmlConverter {
       const sourceRef = { id: xmlConverter.std_node_id(node.id) };
       const targetRef = { id: xmlConverter.std_node_id(node.next) };
 
-      return [moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef })];
+      return [this.moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef })];
     } if (node.type === 'Flow') {
       const sourceRef = { id: xmlConverter.std_node_id(node.id) };
       const outgoing = [];
@@ -100,7 +102,7 @@ class xmlConverter {
         const id = xmlConverter.std_flow_id(node.id, nextId);
         if (outgoing.findIndex((el) => el.id === id) === -1) {
           const targetRef = { id: xmlConverter.std_node_id(nextId) };
-          outgoing.push(moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef }));
+          outgoing.push(this.moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef }));
         }
       }
       return outgoing;
@@ -113,13 +115,13 @@ class xmlConverter {
       throw new Error('Invalid spec: no nodes or no lanes.');
     }
 
-    this.xml_participant = moddle.create('bpmn:Participant', {
+    this.xml_participant = this.moddle.create('bpmn:Participant', {
       id: 'Global_Actor',
       processRef: { id: 'Global_Process' },
       name,
     });
 
-    this.xml_collab = moddle.create('bpmn:Collaboration', {
+    this.xml_collab = this.moddle.create('bpmn:Collaboration', {
       id: 'Global_Colab',
       participants: [
         this.xml_participant,
@@ -134,7 +136,7 @@ class xmlConverter {
     this.xml_laneset = this.build_laneset(blueprint_spec.nodes, blueprint_spec.lanes);
 
     const flowElements = this.xml_nodes.concat(this.xml_sequences);
-    this.xml_process = moddle.create('bpmn:Process', {
+    this.xml_process = this.moddle.create('bpmn:Process', {
       // id: "Process_01zyiho",
       id: 'Global_Process',
       laneSets: [this.xml_laneset],
@@ -148,7 +150,7 @@ class xmlConverter {
     this.xml_diagrams = this.build_diagram(blueprint_spec, this.xml_sequences, id2rank, y_depth);
 
     const rootElements = [this.xml_process, this.xml_collab, this.xml_diagrams];
-    this.root = moddle.create('bpmn:Definitions',
+    this.root = this.moddle.create('bpmn:Definitions',
       {
         rootElements,
         // diagrams: this.xml_diagrams
@@ -186,12 +188,12 @@ class xmlConverter {
         flowNodeRef.push({ id: xmlConverter.std_node_id(node.id) });
       }
     });
-    return moddle.create('bpmn:Lane', { id, flowNodeRef, name: lane.name });
+    return this.moddle.create('bpmn:Lane', { id, flowNodeRef, name: lane.name });
   }
 
   build_laneset(nodes, lanes) {
     const xml_lanes = lanes.map((lane) => this.parse_lane(nodes, lane));
-    return moddle.create('bpmn:LaneSet', { id: 'Global_LaneSet', lanes: xml_lanes });
+    return this.moddle.create('bpmn:LaneSet', { id: 'Global_LaneSet', lanes: xml_lanes });
   }
 
   build_diagram(spec, xml_sequences, id2rank, y_depth) {
@@ -220,7 +222,7 @@ class xmlConverter {
 
     const lanes_ids = spec.lanes.map((lane) => lane.id).sort((a, b) => a - b);
 
-    const default_style = (node) => moddle.create('dc:Bounds', {
+    const default_style = (node) => this.moddle.create('dc:Bounds', {
       x: default_padding + default_x_spacing * id2rank[xmlConverter.std_node_id(node.id)][0],
       y: default_padding + default_y_spacing * id2rank[xmlConverter.std_node_id(node.id)][1] + lane_heigth_con[lanes_ids.findIndex((el) => el === node.lane_id)],
       width: default_width,
@@ -228,19 +230,19 @@ class xmlConverter {
     });
 
     const bounds_style = {
-      Start: (node) => moddle.create('dc:Bounds', {
+      Start: (node) => this.moddle.create('dc:Bounds', {
         x: default_padding + default_x_spacing * id2rank[xmlConverter.std_node_id(node.id)][0] + default_width - start_stop_dim,
         y: default_padding + default_y_spacing * id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim) / 2 + lane_heigth_con[lanes_ids.findIndex((el) => el === node.lane_id)],
         width: start_stop_dim,
         height: start_stop_dim,
       }),
-      Finish: (node) => moddle.create('dc:Bounds', {
+      Finish: (node) => this.moddle.create('dc:Bounds', {
         x: default_padding + default_x_spacing * id2rank[xmlConverter.std_node_id(node.id)][0],
         y: default_padding + default_y_spacing * id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - start_stop_dim) / 2 + lane_heigth_con[lanes_ids.findIndex((el) => el === node.lane_id)],
         width: start_stop_dim,
         height: start_stop_dim,
       }),
-      Flow: (node) => moddle.create('dc:Bounds', {
+      Flow: (node) => this.moddle.create('dc:Bounds', {
         x: default_padding + default_x_spacing * id2rank[xmlConverter.std_node_id(node.id)][0] + (default_width - flow_dim) / 2,
         y: default_padding + default_y_spacing * id2rank[xmlConverter.std_node_id(node.id)][1] + (default_height - flow_dim) / 2 + lane_heigth_con[lanes_ids.findIndex((el) => el === node.lane_id)],
         width: flow_dim,
@@ -264,7 +266,7 @@ class xmlConverter {
     const diagram_nodes = nodes.map((node) => {
       const bounds = bounds_array[xmlConverter.std_node_id(node.id)];
 
-      return moddle.create('bpmndi:BPMNShape', {
+      return this.moddle.create('bpmndi:BPMNShape', {
         id: `${xmlConverter.std_node_id(node.id)}_di`,
         bpmnElement: { id: xmlConverter.std_node_id(node.id) },
         bounds,
@@ -316,7 +318,7 @@ class xmlConverter {
         points_list.push([targetRef.x,
           targetRef.y + targetRef.height / 2]);
       }
-      return points_list.map((el) => moddle.create('dc:Point', { x: el[0], y: el[1] }));
+      return points_list.map((el) => this.moddle.create('dc:Point', { x: el[0], y: el[1] }));
     };
 
     const diagram_edges = xml_sequences.map((seq) => {
@@ -327,7 +329,7 @@ class xmlConverter {
         console.log('Error parsing edge ', seq);
         console.log(e);
       }
-      return moddle.create('bpmndi:BPMNEdge', {
+      return this.moddle.create('bpmndi:BPMNEdge', {
         id: `${seq.id}_di`,
         bpmnElement: { id: seq.id },
         waypoint,
@@ -337,13 +339,13 @@ class xmlConverter {
     const planeElement = diagram_nodes.concat(diagram_edges);
 
     lanes_ids.forEach((lane_id, index) => {
-      const bounds = moddle.create('dc:Bounds', {
+      const bounds = this.moddle.create('dc:Bounds', {
         x: default_padding + 30,
         y: default_padding - default_y_margin + lane_heigth_con[index],
         width: default_total_width - 30,
         height: lane_heigth[index],
       });
-      planeElement.push(moddle.create('bpmndi:BPMNShape', {
+      planeElement.push(this.moddle.create('bpmndi:BPMNShape', {
         id: `${xmlConverter.std_lane_id(lane_id)}_di`,
         bpmnElement: { id: xmlConverter.std_lane_id(lane_id) },
         bounds,
@@ -351,26 +353,26 @@ class xmlConverter {
     });
 
     const total_heigth = lane_heigth.reduce((retval, el) => retval + el, 0);
-    const bounds = moddle.create('dc:Bounds', {
+    const bounds = this.moddle.create('dc:Bounds', {
       x: default_padding,
       y: default_padding - default_y_margin,
       width: default_total_width,
       height: total_heigth,
     });
 
-    planeElement.push(moddle.create('bpmndi:BPMNShape', {
+    planeElement.push(this.moddle.create('bpmndi:BPMNShape', {
       id: 'Global_Actor_di',
       bpmnElement: { id: 'Global_Actor' },
       bounds,
     }));
 
-    const plane = moddle.create('bpmndi:BPMNPlane', {
+    const plane = this.moddle.create('bpmndi:BPMNPlane', {
       id: 'Global_Plane',
       bpmnElement: { id: 'Global_Colab' },
       planeElement,
     });
 
-    return moddle.create('bpmndi:BPMNDiagram', {
+    return this.moddle.create('bpmndi:BPMNDiagram', {
       id: 'Global_Diagram',
       plane,
     });
@@ -461,7 +463,7 @@ class xmlConverter {
   }
 
   async to_xml() {
-    const { xml } = await moddle.toXML(this.root);
+    const { xml } = await this.moddle.toXML(this.root);
     return xml;
   }
 }
