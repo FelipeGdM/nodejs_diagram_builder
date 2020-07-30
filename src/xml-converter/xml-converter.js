@@ -19,6 +19,7 @@
  */
 
 const BpmnModdle = require('bpmn-moddle');
+const debug = require('debug')('flowbuild:xml-builder');
 const Grid = require('./xml-grid');
 
 class xmlConverter {
@@ -258,8 +259,8 @@ class xmlConverter {
       try {
         bounds_array[xmlConverter.std_node_id(node.id)] = bounds_style[node.type](node);
       } catch (e) {
-        console.log('Error in node ', node.id);
-        console.log(e);
+        debug('Error in node ', node.id);
+        debug(e);
       }
     });
 
@@ -326,8 +327,8 @@ class xmlConverter {
       try {
         waypoint = generate_waypoints(bounds_array[seq.sourceRef.id], bounds_array[seq.targetRef.id]);
       } catch (e) {
-        console.log('Error parsing edge ', seq);
-        console.log(e);
+        debug('Error parsing edge ', seq);
+        debug(e);
       }
       return this.moddle.create('bpmndi:BPMNEdge', {
         id: `${seq.id}_di`,
@@ -424,7 +425,7 @@ class xmlConverter {
           break;
 
         default:
-          console.log('xml_converter.discover_node_ranks() -> Unsupported type!', typeof curr_node.next);
+          debug('xml_converter.discover_node_ranks() -> Unsupported type!', typeof curr_node.next);
           break;
       }
 
