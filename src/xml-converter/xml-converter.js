@@ -5,7 +5,7 @@
 /* eslint-disable guard-for-in */
 /* eslint-disable camelcase */
 /**
- * @file xml_converter.js
+ * @file xml-converter.js
  *
  * @brief Loads a json blueprint and build a bpmn xml representation
  *
@@ -425,7 +425,7 @@ class xmlConverter {
           break;
 
         default:
-          debug('xml_converter.discoverNodeRanks() -> Unsupported type!', typeof curr_node.next);
+          debug('xml-converter.discoverNodeRanks() -> Unsupported type!', typeof curr_node.next);
           break;
       }
 

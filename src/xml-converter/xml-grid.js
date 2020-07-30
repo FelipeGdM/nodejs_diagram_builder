@@ -5,7 +5,7 @@
 /* eslint-disable guard-for-in */
 /* eslint-disable camelcase */
 /**
- * @file xml_grid.js
+ * @file xml-grid.js
  *
  * @brief Implements the grid class described in (Kitzmann, 2009)
  *
