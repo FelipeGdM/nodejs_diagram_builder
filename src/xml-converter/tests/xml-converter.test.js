@@ -26,7 +26,7 @@ describe('parsing tests', function () {
 
   describe('invalid input', function () {
     it("Empty spec", async function () {
-      expect(() => converter.build_graph([])).toThrow();
+      expect(() => converter.buildGraph([])).toThrow();
     });
   });
 
@@ -36,7 +36,7 @@ describe('parsing tests', function () {
       const expectedXML = '<bpmn:sequenceFlow xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
         'id="Flow_1_2" sourceRef="Node_1" targetRef="Node_2" />';
 
-      const tag_obj = converter.parse_sequence_flow(start_node)[0];
+      const tag_obj = converter.parseSequenceFlow(start_node)[0];
       const { xml } = await write(tag_obj);
 
       expect(xml).toEqual(expectedXML);
@@ -50,7 +50,7 @@ describe('parsing tests', function () {
 
     it("Id index bijection", async function(){
 
-      const id2index = converter.build_nodes_id2index(simple_workflow.blueprint_spec.nodes);
+      const id2index = converter.buildNodesId2Index(simple_workflow.blueprint_spec.nodes);
       const expected = {"1": 0, "2": 1, "99": 2};
 
       expect(id2index).toStrictEqual(expected);
@@ -58,8 +58,8 @@ describe('parsing tests', function () {
 
     it("Simple node rank discover", async function(){
 
-      const id2index = converter.build_nodes_id2index(simple_workflow.blueprint_spec.nodes);
-      const {id2rank} = converter.discover_node_ranks(simple_workflow.blueprint_spec, id2index);
+      const id2index = converter.buildNodesId2Index(simple_workflow.blueprint_spec.nodes);
+      const {id2rank} = converter.discoverNodeRanks(simple_workflow.blueprint_spec, id2index);
       const expected = {"Node_1": [0,0], "Node_2": [1,0], "Node_99": [2,0]};
 
       expect(id2rank).toStrictEqual(expected);
@@ -73,7 +73,7 @@ describe('parsing tests', function () {
         '<bpmn:outgoing>Flow_1_2</bpmn:outgoing>' +
         '</bpmn:startEvent>';
 
-      const tag_obj = converter.parse_node(start_node, sequences.incoming_flows);
+      const tag_obj = converter.parseNode(start_node, sequences.incoming_flows);
       const { xml } = await write(tag_obj);
       expect(xml).toEqual(expectedXML);
 
@@ -86,7 +86,7 @@ describe('parsing tests', function () {
         '<bpmn:incoming>Flow_2_99</bpmn:incoming>' +
         '</bpmn:endEvent>';
 
-      const tag_obj = converter.parse_node(finish_node, sequences.incoming_flows);
+      const tag_obj = converter.parseNode(finish_node, sequences.incoming_flows);
       const { xml } = await write(tag_obj);
       expect(xml).toEqual(expectedXML);
     });
@@ -99,7 +99,7 @@ describe('parsing tests', function () {
         '<bpmn:outgoing>Flow_2_99</bpmn:outgoing>' +
         '</bpmn:serviceTask>';
 
-      const tag_obj = converter.parse_node(system_task_node, sequences.incoming_flows);
+      const tag_obj = converter.parseNode(system_task_node, sequences.incoming_flows);
       const { xml } = await write(tag_obj);
       expect(xml).toEqual(expectedXML);
     });
@@ -113,7 +113,7 @@ describe('parsing tests', function () {
         '<bpmn:outgoing>Flow_2_99</bpmn:outgoing>' +
         '</bpmn:scriptTask>';
 
-      const tag_obj = converter.parse_node(script_node, sequences.incoming_flows);
+      const tag_obj = converter.parseNode(script_node, sequences.incoming_flows);
       const { xml } = await write(tag_obj);
       expect(xml).toEqual(expectedXML);
     })
@@ -134,7 +134,7 @@ describe('parsing tests', function () {
         '</bpmn:lane>' +
         '</bpmn:laneSet>';
 
-      das_converter.build_graph(simple_workflow.blueprint_spec);
+      das_converter.buildGraph(simple_workflow.blueprint_spec);
 
       const { xml } = await write(das_converter.xml_laneset);
       expect(xml).toEqual(expectedXML);
@@ -156,7 +156,7 @@ describe('parsing tests', function () {
         '</bpmn:lane>' +
         '</bpmn:laneSet>';
 
-      das_converter.build_graph(lanes_example.blueprint_spec);
+      das_converter.buildGraph(lanes_example.blueprint_spec);
 
       const { xml } = await write(das_converter.xml_laneset);
       expect(xml).toEqual(expectedXML);
@@ -173,7 +173,7 @@ describe('parsing tests', function () {
       const expectedXML = '<bpmn:participant xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
         'id="Global_Actor" name="SIMPLE_WORKFLOW" processRef="Global_Process" />';
 
-      das_converter.build_graph(simple_workflow.blueprint_spec, simple_workflow.name);
+      das_converter.buildGraph(simple_workflow.blueprint_spec, simple_workflow.name);
       const { xml } = await write(das_converter.xml_participant);
       expect(xml).toEqual(expectedXML);
 
@@ -186,7 +186,7 @@ describe('parsing tests', function () {
         '<bpmn:participant id="Global_Actor" name="SIMPLE_WORKFLOW" processRef="Global_Process" />' +
         '</bpmn:collaboration>';
 
-      das_converter.build_graph(simple_workflow.blueprint_spec, simple_workflow.name);
+      das_converter.buildGraph(simple_workflow.blueprint_spec, simple_workflow.name);
       const { xml } = await write(das_converter.xml_collab);
       expect(xml).toEqual(expectedXML);
 
@@ -215,7 +215,7 @@ describe('parsing tests', function () {
         '<bpmn:sequenceFlow id="Flow_2_99" sourceRef="Node_2" targetRef="Node_99" />' +
         '</bpmn:process>';
 
-      das_converter.build_graph(simple_workflow.blueprint_spec);
+      das_converter.buildGraph(simple_workflow.blueprint_spec);
       const { xml } = await write(das_converter.xml_process);
       expect(xml).toEqual(expectedXML);
 
@@ -282,7 +282,7 @@ describe('parsing tests', function () {
         '</bpmndi:BPMNDiagram>' +
       '</bpmn:definitions>'
 
-      converter.build_graph(simple_workflow.blueprint_spec);
+      converter.buildGraph(simple_workflow.blueprint_spec);
       const retval = await converter.to_xml();
       expect(retval).toBe(expected_xml);
     });

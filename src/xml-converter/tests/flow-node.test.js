@@ -30,7 +30,7 @@ describe('parsing tests', function () {
         '<bpmn:outgoing>Flow_3_5</bpmn:outgoing>' +
         '</bpmn:exclusiveGateway>';
 
-      const tag_obj = converter.parse_node(flow_node, incoming_flows);
+      const tag_obj = converter.parseNode(flow_node, incoming_flows);
       const { xml } = await write(tag_obj);
       expect(xml).toEqual(expectedXML);
 
@@ -87,7 +87,7 @@ describe('parsing tests', function () {
         '<bpmn:sequenceFlow id="Flow_5_99" sourceRef="Node_5" targetRef="Node_99" />' +
         '</bpmn:process>';
 
-      das_converter.build_graph(flow_example.blueprint_spec);
+      das_converter.buildGraph(flow_example.blueprint_spec);
       const { xml } = await write(das_converter.xml_process);
       expect(xml).toEqual(expectedXML);
     })

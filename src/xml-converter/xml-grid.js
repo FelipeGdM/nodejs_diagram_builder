@@ -22,11 +22,11 @@ class Grid {
     this.grid = {};
   }
 
-  get_size() {
+  getSize() {
     return [...this.size];
   }
 
-  add_column_after(column) {
+  addColumnAfter(column) {
     Object.keys(this.grid).forEach((key) => {
       if (this.grid[key][0] > column) {
         this.grid[key][0] += 1;
@@ -35,7 +35,7 @@ class Grid {
     this.size[0] += 1;
   }
 
-  add_row_after(row) {
+  addRowAfter(row) {
     Object.keys(this.grid).forEach((key) => {
       if (this.grid[key][1] > row) {
         this.grid[key][1] += 1;
@@ -44,7 +44,7 @@ class Grid {
     this.size[1] += 1;
   }
 
-  delete_row(row) {
+  deleteRow(row) {
     Object.keys(this.grid).forEach((key) => {
       if (this.grid[key][1] > row) {
         this.grid[key][1] -= 1;
@@ -53,39 +53,39 @@ class Grid {
     this.size[1] -= 1;
   }
 
-  is_free(pos) {
+  isFree(pos) {
     const non_free = Object.keys(this.grid).map((key) => this.grid[key]);
     return non_free.findIndex((el) => el[0] === pos[0] && el[1] === pos[1]) === -1;
   }
 
-  is_in_range(pos) {
+  isInRange(pos) {
     return pos[0] <= this.size[0] && pos[1] <= this.size[1];
   }
 
-  add_element(element_id, pos) {
-    if (!this.is_in_range(pos)) {
+  addElement(element_id, pos) {
+    if (!this.isInRange(pos)) {
       this.grid[element_id] = pos;
       this.size[0] = Math.max(this.size[0], pos[0]);
       this.size[1] = Math.max(this.size[1], pos[1]);
       return;
     }
 
-    if (!this.is_free(pos)) {
+    if (!this.isFree(pos)) {
       throw Error('Trying to set a non free cell!');
     }
 
     this.grid[element_id] = pos;
   }
 
-  seen_nodes() {
+  seenNodes() {
     return Object.keys(this.grid);
   }
 
-  get_node_pos(node_id) {
+  getNodePos(node_id) {
     return this.grid[node_id];
   }
 
-  merge_row_below(row) {
+  mergeRowBelow(row) {
     let mergeble = true;
     const new_row = [];
 
@@ -107,14 +107,14 @@ class Grid {
       this.grid[el[0]] = [el[1], row];
     });
 
-    this.delete_row(row + 1);
+    this.deleteRow(row + 1);
     return true;
   }
 
   simplify() {
     let row = 0;
     while (row < this.size[1]) {
-      if (!this.merge_row_below(row)) {
+      if (!this.mergeRowBelow(row)) {
         row++;
       }
     }
