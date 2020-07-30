@@ -1,9 +1,9 @@
-const { xmlConverter } = require('../xml_converter');
+const { xmlConverter } = require('../xml-converter');
 const BpmnModdle = require('bpmn-moddle');
 const moddle = new BpmnModdle();
 
-const flow_example = require('./blueprints/flow_example');
-const simple_workflow = require('./blueprints/simple_workflow');
+const flow_example = require('./blueprints/flow-example');
+const simple_workflow = require('./blueprints/simple-workflow');
 
 const flow_node = flow_example.blueprint_spec.nodes[2];
 

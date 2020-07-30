@@ -1,8 +1,8 @@
 /* eslint-disable new-cap */
-const { xmlConverter } = require('./src/xml_converter/xml_converter');
+const { XmlConverter } = require('./src/xml-converter/xml-converter');
 
 async function buildXmlDiagram(blueprintSpec, workflowName) {
-  const json2xml = new xmlConverter();
+  const json2xml = new XmlConverter();
   json2xml.build_graph(blueprintSpec, workflowName);
   return json2xml.to_xml();
 }

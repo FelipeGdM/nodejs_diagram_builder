@@ -1,12 +1,12 @@
-const { xmlConverter } = require('../xml_converter');
+const { xmlConverter } = require('../xml-converter');
 const fs = require('fs');
 const path = require('path');
 const BpmnModdle = require('bpmn-moddle');
 const moddle = new BpmnModdle();
 
-const simple_workflow = require('./blueprints/simple_workflow');
-const script_example = require('./blueprints/script_example');
-const lanes_example = require('./blueprints/lanes_example');
+const simple_workflow = require('./blueprints/simple-workflow');
+const script_example = require('./blueprints/script-example');
+const lanes_example = require('./blueprints/lanes-example');
 
 const start_node = simple_workflow.blueprint_spec.nodes[0];
 const system_task_node = simple_workflow.blueprint_spec.nodes[1];

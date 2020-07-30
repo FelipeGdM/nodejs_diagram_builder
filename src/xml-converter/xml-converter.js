@@ -19,7 +19,7 @@
  */
 
 const BpmnModdle = require('bpmn-moddle');
-const Grid = require('./xml_grid');
+const Grid = require('./xml-grid');
 
 class xmlConverter {
   constructor() {
