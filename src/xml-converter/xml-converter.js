@@ -1,8 +1,5 @@
-/* eslint-disable no-plusplus */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-len */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable guard-for-in */
 /* eslint-disable camelcase */
 /**
  * @file xml-converter.js
@@ -98,14 +95,14 @@ class xmlConverter {
     } if (node.type === 'Flow') {
       const sourceRef = { id: xmlConverter.stdNodeId(node.id) };
       const outgoing = [];
-      for (const value in node.next) {
+      Object.keys(node.next).forEach((value) => {
         const nextId = node.next[value];
         const id = xmlConverter.stdFlowId(node.id, nextId);
         if (outgoing.findIndex((el) => el.id === id) === -1) {
           const targetRef = { id: xmlConverter.stdNodeId(nextId) };
           outgoing.push(this.moddle.create('bpmn:SequenceFlow', { id, sourceRef, targetRef }));
         }
-      }
+      });
       return outgoing;
     }
     return [];
@@ -217,7 +214,7 @@ class xmlConverter {
     const lane_heigth = y_depth.map((el) => el * default_y_spacing);
 
     const lane_heigth_con = [0];
-    for (let i = 1; i < lane_heigth.length; i++) {
+    for (let i = 1; i < lane_heigth.length; i += 1) {
       lane_heigth_con.push(lane_heigth_con[i - 1] + lane_heigth[i - 1]);
     }
 

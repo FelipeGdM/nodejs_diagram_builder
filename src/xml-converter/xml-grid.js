@@ -1,8 +1,3 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable max-len */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable guard-for-in */
 /* eslint-disable camelcase */
 /**
  * @file xml-grid.js
@@ -55,7 +50,8 @@ class Grid {
 
   isFree(pos) {
     const non_free = Object.keys(this.grid).map((key) => this.grid[key]);
-    return non_free.findIndex((el) => el[0] === pos[0] && el[1] === pos[1]) === -1;
+    return non_free
+      .findIndex((el) => el[0] === pos[0] && el[1] === pos[1]) === -1;
   }
 
   isInRange(pos) {
@@ -89,9 +85,15 @@ class Grid {
     let mergeble = true;
     const new_row = [];
 
-    for (let column = 0; column < this.size[0]; column++) {
-      const above_row = Object.keys(this.grid).find((node_id) => this.grid[node_id][0] === column && this.grid[node_id][1] === row);
-      const below_row = Object.keys(this.grid).find((node_id) => this.grid[node_id][0] === column && this.grid[node_id][1] === row + 1);
+    for (let column = 0; column < this.size[0]; column += 1) {
+      const above_row = Object.keys(this.grid)
+        .find((node_id) => this.grid[node_id][0] === column
+          && this.grid[node_id][1] === row);
+
+      const below_row = Object.keys(this.grid)
+        .find((node_id) => this.grid[node_id][0] === column
+          && this.grid[node_id][1] === row + 1);
+
       if (above_row !== undefined && below_row !== undefined) {
         mergeble = false;
         break;
@@ -115,7 +117,7 @@ class Grid {
     let row = 0;
     while (row < this.size[1]) {
       if (!this.mergeRowBelow(row)) {
-        row++;
+        row += 1;
       }
     }
   }
