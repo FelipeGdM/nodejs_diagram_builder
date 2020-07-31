@@ -1,4 +1,3 @@
-/* eslint-disable new-cap */
 const { XmlConverter } = require('./src/xml-converter/xml-converter');
 
 async function buildXmlDiagram(blueprintSpec, workflowName) {

@@ -1,4 +1,4 @@
-const { xmlConverter } = require('../xml-converter');
+const { XmlConverter } = require('../xml-converter');
 const BpmnModdle = require('bpmn-moddle');
 const moddle = new BpmnModdle();
 
@@ -7,7 +7,7 @@ const simple_workflow = require('./blueprints/simple-workflow');
 
 const flow_node = flow_example.blueprint_spec.nodes[2];
 
-const converter = new xmlConverter();
+const converter = new XmlConverter();
 
 describe('parsing tests', function () {
   function write(element) {
@@ -39,7 +39,7 @@ describe('parsing tests', function () {
   })
 
   describe('blueprint parser', function () {
-    const das_converter = new xmlConverter();
+    const das_converter = new XmlConverter();
 
     it('should parse all nodes into one xml', async function () {
 

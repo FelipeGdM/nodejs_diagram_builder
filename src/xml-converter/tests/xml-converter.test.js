@@ -1,4 +1,4 @@
-const { xmlConverter } = require('../xml-converter');
+const { XmlConverter } = require('../xml-converter');
 const fs = require('fs');
 const path = require('path');
 const BpmnModdle = require('bpmn-moddle');
@@ -14,7 +14,7 @@ const finish_node = simple_workflow.blueprint_spec.nodes[2];
 
 const script_node = script_example.blueprint_spec.nodes[1];
 
-const converter = new xmlConverter();
+const converter = new XmlConverter();
 
 describe('parsing tests', function () {
 
@@ -123,7 +123,7 @@ describe('parsing tests', function () {
   describe('lane parser', function () {
 
     it("Start node", async function () {
-      const das_converter = new xmlConverter();
+      const das_converter = new XmlConverter();
 
       const expectedXML = '<bpmn:laneSet xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
         'id="Global_LaneSet">' +
@@ -142,7 +142,7 @@ describe('parsing tests', function () {
     });
 
     it("should parse 2 lanes with their names", async function () {
-      const das_converter = new xmlConverter();
+      const das_converter = new XmlConverter();
 
       const expectedXML = '<bpmn:laneSet xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
         'id="Global_LaneSet">' +
@@ -166,7 +166,7 @@ describe('parsing tests', function () {
 
   describe('collab parser', function () {
 
-    const das_converter = new xmlConverter();
+    const das_converter = new XmlConverter();
 
     it("Create participant tag", async function () {
 
