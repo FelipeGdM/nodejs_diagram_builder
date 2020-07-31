@@ -392,9 +392,10 @@ class XmlConverter {
     const grids = {};
     lanes_ids.forEach((id) => { grids[id] = new Grid(); });
 
+    const start_nodes = nodes.filter((node) => node.type === 'Start');
     const fifo = [];
 
-    fifo.unshift(nodes[0]);
+    fifo.unshift(start_nodes.shift());
 
     grids[nodes[0].lane_id].addElement(XmlConverter.stdNodeId(nodes[0].id), [0, 0]);
 
@@ -443,6 +444,38 @@ class XmlConverter {
           fifo.unshift(nodes[id2index[child_id]]);
         }
       });
+    }
+
+    while (start_nodes.length !== 0) {
+      let curr_node = start_nodes.shift();
+      const stack = [];
+      stack.push(curr_node);
+      // Stop if we find a finish node or an already seen node
+      while (typeof curr_node !== 'undefined'
+        && !grids[curr_node.lane_id].seenNodes().includes(XmlConverter.stdNodeId(curr_node.id))) {
+        if (typeof curr_node.next === 'object') {
+          throw Error('Unsupported multiple starts and flow node yet!');
+        }
+        stack.push(curr_node);
+        curr_node = id2index[curr_node.next];
+      }
+
+      const base_rank = !grids[curr_node.lane_id].get_node_pos(XmlConverter.stdNodeId(curr_node.id));
+      if (base_rank[1] === 0) {
+        grids[curr_node.lane_id].addRowBefore(base_rank[1]);
+      } else {
+        grids[curr_node.lane_id].addRowAfter(base_rank[1]);
+      }
+
+      while (stack.length !== 0) {
+        curr_node = stack.pop();
+        grids[curr_node.lane_id].addElement(XmlConverter.stdNodeId(curr_node.id), base_rank);
+        base_rank[0] -= 1;
+        if (base_rank[0] < 0) {
+          grids[curr_node.lane_id].addColumnBefore(0);
+          base_rank[0] = 0;
+        }
+      }
     }
 
     const id2rank = {};
