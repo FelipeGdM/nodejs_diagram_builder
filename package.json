@@ -1,15 +1,15 @@
 {
-    "name": "@flowbuild/cockpit",
+    "name": "@fieldlink/nodejs-diagram-builder",
     "version": "1.0.0",
-    "description": "workflow manager api",
+    "description": "Diagram builder from workflow blueprint",
     "main": "index.js",
     "author": "fdte-dsd",
     "license": "Apache-2.0",
     "keywords": [],
-    "homepage": "https://github.com/flow-build/cockpit#readme",
+    "homepage": "https://bitbucket.org/fieldlink/nodejs-diagram-builder/src/master/",
     "repository": {
         "type": "git",
-        "url": "https://github.com/flow-build/cockpit.git"
+        "url": "https://bitbucket.org/fieldlink/nodejs-diagram-builder.git"
     },
     "scripts": {
         "test": "jest",
@@ -31,9 +31,6 @@
         "jest": "^26.1.0",
         "prettier": "^2.0.4",
         "semantic-release": "^17.0.4"
-    },
-    "publishConfig": {
-        "access": "public"
     },
     "dependencies": {
         "bpmn-moddle": "^7.0.3",
